@@ -2,7 +2,7 @@
   "name": "ars-ecommerce-frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://yourusername.github.io/ars_ecommerce",
+  "homepage": "https://alchemist70.github.io/arc_commerce",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -20,7 +20,7 @@
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "start": "react-scripts --max_old_space_size=4096 start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

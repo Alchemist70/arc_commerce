@@ -303,8 +303,8 @@ const Cart = () => {
               onClick={handleCheckout}
               disabled={cartItems.length === 0}
             >
-              Proceed to Checkout
-            </button>
+            Proceed to Checkout
+          </button>
           </div>
         </div>
       </div>

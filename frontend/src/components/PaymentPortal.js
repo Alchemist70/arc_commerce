@@ -152,8 +152,8 @@ const PaymentPortal = () => {
           }
           return {
             product_id: productId,
-            quantity: item.quantity,
-            price: item.price,
+          quantity: item.quantity,
+          price: item.price,
           };
         }),
         total: parseFloat(total),
@@ -310,9 +310,9 @@ const PaymentPortal = () => {
                   <FontAwesomeIcon icon={faArrowLeft} />
                   Back
                 </button>
-                <button type="submit" className="continue-button">
-                  Continue to Payment
-                </button>
+              <button type="submit" className="continue-button">
+                Continue to Payment
+              </button>
               </div>
             </form>
           </div>
@@ -399,9 +399,9 @@ const PaymentPortal = () => {
             )}
 
             <div className="button-group">
-              <button 
+              <button
                 type="button" 
-                className="back-button" 
+                className="back-button"
                 onClick={() => setCurrentStep("shipping")}
               >
                 <FontAwesomeIcon icon={faArrowLeft} />

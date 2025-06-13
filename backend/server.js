@@ -25,6 +25,7 @@ app.use(
       "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:3002",
+      "https://alchemist70.github.io"
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],

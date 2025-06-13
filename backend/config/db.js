@@ -1,5 +1,6 @@
 require("dotenv").config();
 const mysql = require("mysql2/promise");
+const initializeDatabase = require('./initDb');
 
 let pool;
 if (process.env.MYSQL_URL) {
@@ -17,18 +18,25 @@ if (process.env.MYSQL_URL) {
   });
 }
 
-// Test the database connection
-pool
-  .getConnection()
-  .then((connection) => {
+// Test the database connection and initialize
+async function setupDatabase() {
+  try {
+    const connection = await pool.getConnection();
     console.log("Database connected successfully");
     if (process.env.DB_NAME) {
       console.log("Connected to database:", process.env.DB_NAME);
     }
     connection.release();
-  })
-  .catch((err) => {
-    console.error("Error connecting to the database:", err);
-  });
+
+    // Initialize database schema and sample data
+    await initializeDatabase();
+  } catch (err) {
+    console.error("Error setting up the database:", err);
+    throw err;
+  }
+}
+
+// Run setup
+setupDatabase().catch(console.error);
 
 module.exports = pool;

@@ -1,0 +1,70 @@
+/* General styling for the home page */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+/* Main container */
+.home-container {
+  width: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 40px;
+  padding-top: 220px; /* Updated padding to account for both header and navbar */
+}
+
+/* Center the main sections */
+.product-section,
+.wishlist-section {
+  width: 80%;
+  margin: 20px auto;
+  padding: 20px;
+  background: white;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+/* Product list styling */
+.product-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.product-section li {
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-section button {
+  background-color: #ff5757;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.product-section button:hover {
+  background-color: #d94040;
+}
+
+/* Wishlist styling */
+.wishlist-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.wishlist-section li {
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+}

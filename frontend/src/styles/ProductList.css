@@ -1,0 +1,138 @@
+.product-list {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.product-list h2 {
+  text-align: center;
+  color: #1e3a8a;
+  margin-bottom: 30px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.product-info {
+  padding: 10px;
+}
+
+.product-info h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.2em;
+  color: #333;
+}
+
+.brand {
+  color: #666;
+  font-size: 0.9em;
+  margin: 5px 0;
+}
+
+.category {
+  color: #888;
+  font-size: 0.9em;
+  margin: 5px 0;
+}
+
+.price {
+  font-size: 1.2em;
+  color: #1e3a8a;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.description {
+  color: #666;
+  font-size: 0.9em;
+  margin: 10px 0;
+  line-height: 1.4;
+}
+
+.product-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.add-to-cart,
+.add-to-wishlist {
+  flex: 1;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.add-to-cart {
+  background-color: #1e3a8a;
+  color: white;
+}
+
+.add-to-cart:hover {
+  background-color: #152a5f;
+}
+
+.add-to-wishlist {
+  background-color: #fbbf24;
+  color: #1e3a8a;
+  font-weight: bold;
+}
+
+.add-to-wishlist:hover {
+  background-color: #f59e0b;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 20px;
+  color: #f44336;
+  font-size: 1.2em;
+}
+
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 10px;
+  }
+
+  .product-actions {
+    flex-direction: column;
+  }
+}

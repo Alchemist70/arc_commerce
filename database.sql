@@ -1,0 +1,34 @@
+CREATE DATABASE electronics_catalogs;
+USE electronics_catalogs;
+
+CREATE TABLE products (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  brand VARCHAR(100) NOT NULL,
+  category VARCHAR(100) NOT NULL,
+  price DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE wishlist (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  product_id INT NOT NULL,
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  fullname VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  phone VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_addresses (
+  user_id INT PRIMARY KEY,
+  address TEXT NOT NULL,
+  city VARCHAR(100) NOT NULL,
+  state VARCHAR(100) NOT NULL,
+  zip_code VARCHAR(20) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+); 

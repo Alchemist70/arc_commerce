@@ -1,0 +1,159 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Top Header */
+.top-header {
+  background: linear-gradient(135deg, #00203f 0%, #1c4c96 100%);
+  padding: 8px 0;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  height: 45px;
+}
+
+.header-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 30px;
+}
+
+.logo {
+  font-size: 22px;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo span {
+  color: #ffd700;
+  font-style: italic;
+}
+
+/* Signup Form Container */
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 120px 20px 40px;
+  box-sizing: border-box;
+}
+
+.signup-box {
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 20px auto;
+  overflow-y: auto;
+  max-height: 80vh;
+}
+
+/* Input Fields */
+.input-group {
+  margin-bottom: 12px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #1c4c96;
+  box-shadow: 0 0 0 2px rgba(28, 76, 150, 0.1);
+  outline: none;
+}
+
+/* Password Field with Icon */
+.password-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input input {
+  width: 100%;
+  padding-right: 40px; /* Space for eye icon */
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  cursor: pointer;
+  color: #666;
+  font-size: 16px;
+}
+
+.password-toggle:hover {
+  color: #1c4c96;
+}
+
+/* Signup Button */
+.signup-btn {
+  background: linear-gradient(45deg, #00e6b8, #00b894);
+  color: white;
+  border: none;
+  padding: 12px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.signup-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 230, 184, 0.2);
+}
+
+/* Login Link */
+.login-link {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.login-link a {
+  color: #1c4c96;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Remove any fixed heights that might cut off content */
+form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

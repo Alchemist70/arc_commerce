@@ -1,0 +1,17 @@
+#shop {
+    text-align: center;
+    padding: 50px 20px;
+    background-color: #f5f5f5;
+  }
+  
+  #shop h2 {
+    font-size: 28px;
+    color: #0d47a1;
+    margin-bottom: 10px;
+  }
+  
+  #shop p {
+    font-size: 18px;
+    color: #616161;
+  }
+  

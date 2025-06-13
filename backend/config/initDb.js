@@ -1,8 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
-const pool = require('./db');
 
-async function initializeDatabase() {
+async function initializeDatabase(pool) {
   try {
     // Read the SQL file
     const sqlFile = await fs.readFile(path.join(__dirname, '../database.sql'), 'utf8');

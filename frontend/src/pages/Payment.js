@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import OrderSummary from "../components/OrderSummary";
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
+// Hardcoded API URL for production
+const API_URL = "https://ars-commercess.onrender.com";
 
 const Payment = () => {
   const location = useLocation();

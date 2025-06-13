@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
+// Hardcoded API URL for production
+const API_URL = "https://ars-commercess.onrender.com";
 
 const UserProfile = () => {
   const navigate = useNavigate();

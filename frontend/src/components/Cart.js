@@ -14,9 +14,12 @@ import tvDefault from "../assets/tv-default.jpg";
 import tabletDefault from "../assets/tablet-default.jpg";
 import defaultImage from "../assets/default-product.jpg";
 
+// Hardcoded baseURL for production
+const baseURL = "https://ars-commercess.onrender.com";
+
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5002",
+  baseURL: baseURL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

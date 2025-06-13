@@ -4,7 +4,8 @@ import axios from "axios";
 import "../styles/Checkout.css";
 import OrderSummary from "./OrderSummary";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
+// Hardcoded API URL for production
+const API_URL = "https://ars-commercess.onrender.com";
 
 const Checkout = () => {
   const location = useLocation();

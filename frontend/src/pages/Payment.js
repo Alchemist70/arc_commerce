@@ -4,7 +4,7 @@ import OrderSummary from "../components/OrderSummary";
 import axios from "axios";
 
 // Hardcoded API URL for production
-const API_URL = "https://ars-commercess.onrender.com";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
 
 const Payment = () => {
   const location = useLocation();

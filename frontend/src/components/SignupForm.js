@@ -23,8 +23,8 @@ const SignupForm = () => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate(); // Hook for navigation
 
-  // Hardcoded API URL for production
-  const API_URL = "https://ars-commercess.onrender.com";
+  // Use environment variable for API URL
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -14,7 +14,7 @@ import tabletDefault from "../assets/tablet-default.jpg";
 import defaultImage from "../assets/default-product.jpg";
 
 // Hardcoded API URL for production
-const API_URL = "https://ars-commercess.onrender.com";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
 
 const WishList = () => {
   const [wishlistItems, setWishlistItems] = useState([]);

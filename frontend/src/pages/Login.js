@@ -10,8 +10,8 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Hardcoded API URL for production
-  const API_URL = "https://ars-commercess.onrender.com";
+  // Use environment variable for API URL
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
 
   const handleLogin = async (e) => {
     e.preventDefault();

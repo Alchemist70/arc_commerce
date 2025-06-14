@@ -14,7 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 // Hardcoded baseURL for production
-const baseURL = "https://ars-commercess.onrender.com";
+const baseURL = process.env.REACT_APP_API_URL || "http://localhost:5002";
 
 // Create axios instance with default config
 const api = axios.create({

@@ -15,7 +15,7 @@ import tabletDefault from "../assets/tablet-default.jpg";
 import defaultImage from "../assets/default-product.jpg";
 
 // Hardcoded baseURL for production
-const baseURL = "https://ars-commercess.onrender.com";
+const baseURL = process.env.REACT_APP_API_URL || "http://localhost:5002";
 
 // Create axios instance with default config
 const api = axios.create({

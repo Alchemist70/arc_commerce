@@ -2,7 +2,6 @@
   "name": "ars-ecommerce-frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://alchemist70.github.io/arc_commerce",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -10,16 +9,12 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/material": "^6.4.8",
     "axios": "^1.8.4",
-    "gh-pages": "^6.3.0",
-    "nodemailer": "^6.10.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.5.0",
     "react-scripts": "^5.0.1"
   },
   "scripts": {
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -41,6 +36,5 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.17"
-  },
-  "proxy": "http://localhost:5002"
+  }
 }

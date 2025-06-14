@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "./static/css/main.72fc9272.css",
-    "main.js": "./static/js/main.8e69b118.js",
-    "static/media/default-product.jpg": "./static/media/default-product.bc3e86ea07db2e4176b5.jpg",
-    "static/media/mobile-default.jpg": "./static/media/mobile-default.4854224ace3079a0e73a.jpg",
-    "static/media/google-logo.png": "./static/media/google-logo.0ab624a7fb7ff555c9ca.png",
-    "static/media/circuit-pattern.png": "./static/media/circuit-pattern.73fe7f7fe9156e5d77af.png",
-    "static/media/tv-default.jpg": "./static/media/tv-default.4b07928c17ac82eb1065.jpg",
-    "static/media/audio-default.jpg": "./static/media/audio-default.744601f093c829dddac1.jpg",
-    "static/media/laptop-default.jpg": "./static/media/laptop-default.11180f9dd9dbb0d6877d.jpg",
-    "static/media/tablet-default.jpg": "./static/media/tablet-default.fc972820ebc44a85bfc4.jpg",
-    "static/media/smart_tv.jpg": "./static/media/smart_tv.090a5c585541163fcdb6.jpg",
-    "index.html": "./index.html",
-    "main.72fc9272.css.map": "./static/css/main.72fc9272.css.map",
-    "main.8e69b118.js.map": "./static/js/main.8e69b118.js.map"
+    "main.css": "/arc_commerce/static/css/main.e92338d5.css",
+    "main.js": "/arc_commerce/static/js/main.1938e165.js",
+    "static/media/default-product.jpg": "/arc_commerce/static/media/default-product.bc3e86ea07db2e4176b5.jpg",
+    "static/media/mobile-default.jpg": "/arc_commerce/static/media/mobile-default.4854224ace3079a0e73a.jpg",
+    "static/media/google-logo.png": "/arc_commerce/static/media/google-logo.0ab624a7fb7ff555c9ca.png",
+    "static/media/circuit-pattern.png": "/arc_commerce/static/media/circuit-pattern.73fe7f7fe9156e5d77af.png",
+    "static/media/tv-default.jpg": "/arc_commerce/static/media/tv-default.4b07928c17ac82eb1065.jpg",
+    "static/media/audio-default.jpg": "/arc_commerce/static/media/audio-default.744601f093c829dddac1.jpg",
+    "static/media/laptop-default.jpg": "/arc_commerce/static/media/laptop-default.11180f9dd9dbb0d6877d.jpg",
+    "static/media/tablet-default.jpg": "/arc_commerce/static/media/tablet-default.fc972820ebc44a85bfc4.jpg",
+    "static/media/smart_tv.jpg": "/arc_commerce/static/media/smart_tv.090a5c585541163fcdb6.jpg",
+    "index.html": "/arc_commerce/index.html",
+    "main.e92338d5.css.map": "/arc_commerce/static/css/main.e92338d5.css.map",
+    "main.1938e165.js.map": "/arc_commerce/static/js/main.1938e165.js.map"
   },
   "entrypoints": [
-    "static/css/main.72fc9272.css",
-    "static/js/main.8e69b118.js"
+    "static/css/main.e92338d5.css",
+    "static/js/main.1938e165.js"
   ]
 }

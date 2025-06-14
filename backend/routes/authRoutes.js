@@ -2,15 +2,15 @@ require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const pool = require("../models/db");
+const pool = require("../models/db"); // Using pg pool
 const jwt = require("jsonwebtoken");
 
+// ------------------ LOGIN ------------------
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     console.log("Login attempt for:", email);
 
-    // Get user from database
     const { rows: users } = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
@@ -21,16 +21,13 @@ router.post("/login", async (req, res) => {
     }
 
     const user = users[0];
-    console.log("User found:", { ...user, password: "[REDACTED]" }); // Log user info without password
+    console.log("User found:", { ...user, password: "[REDACTED]" });
 
-    // Special handling for admin login
     let isValidPassword = false;
 
     if (user.isadmin) {
-      // For admin, direct password comparison
       isValidPassword = password === user.password;
     } else {
-      // For regular users, use bcrypt comparison
       isValidPassword = await bcrypt.compare(password, user.password);
     }
 
@@ -38,7 +35,6 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Create token with consistent field names
     const tokenPayload = {
       userId: user.id,
       email: user.email,
@@ -46,13 +42,10 @@ router.post("/login", async (req, res) => {
       isAdmin: Boolean(user.isadmin),
     };
 
-    console.log("Token payload:", tokenPayload); // Log token payload for debugging
-
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });
 
-    // Remove password from user object
     const { password: _, ...userWithoutPassword } = user;
 
     console.log(
@@ -66,7 +59,7 @@ router.post("/login", async (req, res) => {
       message: "Login successful",
       user: {
         ...userWithoutPassword,
-        isAdmin: Boolean(user.isadmin), // Ensure isAdmin is boolean
+        isAdmin: Boolean(user.isadmin),
       },
       token,
     });
@@ -76,28 +69,24 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Test route to verify auth routes are working
+// ------------------ TEST ROUTE ------------------
 router.get("/test", (req, res) => {
   res.json({ message: "Auth routes are working" });
 });
 
-// Registration route
+// ------------------ REGISTER ------------------
 router.post("/register", async (req, res) => {
-  let connection;
   try {
     console.log("Registration request received:", req.body);
 
     const { fullname, email, phone, password } = req.body;
 
-    // Validate input
     if (!fullname || !email || !phone || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    connection = await pool.getConnection();
-
     // Check if user exists
-    const { rows: existingUsers } = await connection.query(
+    const { rows: existingUsers } = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
@@ -110,7 +99,7 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insert new user
-    const { rows: result } = await connection.query(
+    const { rows: result } = await pool.query(
       "INSERT INTO users (fullname, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING id",
       [fullname, email, phone, hashedPassword]
     );
@@ -122,14 +111,6 @@ router.post("/register", async (req, res) => {
   } catch (error) {
     console.error("Registration error:", error);
     res.status(500).json({ message: "Server error during registration" });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 

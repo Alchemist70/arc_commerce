@@ -5,7 +5,7 @@ import App from "./app";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <BrowserRouter basename={process.env.PUBLIC_URL}>
+  <BrowserRouter basename={process.env.ACT_APP_API_URL}>
     <App />
   </BrowserRouter>
 );

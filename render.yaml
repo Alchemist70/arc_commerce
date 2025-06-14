@@ -10,11 +10,8 @@ services:
         value: production
       - key: DATABASE_URL
         value: postgresql://alchemist:2kX8FNPzloQELdSD5GYCJC2q3Bnqcqnb@dpg-d16hp66mcj7s73c5m5e0-a.oregon-postgres.render.com/electronics_catalogs
-      # You may optionally add SMTP credentials via dashboard or here:
-      # - key: SMTP_USER
-      #   value: your_email@example.com
-      # - key: SMTP_PASS
-      #   value: your_email_password
+      - key: PORT
+        value: 5002 # 🔧 Optional, but keeps port consistent
 
   - type: web
     name: frontend

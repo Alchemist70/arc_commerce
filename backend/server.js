@@ -18,14 +18,15 @@ const app = express();
 // Enable JSON body parsing
 app.use(express.json());
 
-// CORS configuration
+// ✅ CORS configuration — ADD frontend deploy URL
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:3002",
-      "https://alchemist70.github.io"
+      "https://alchemist70.github.io",
+      "https://ars-commerce-frontend.onrender.com", // ✅ Render frontend domain
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -33,9 +34,15 @@ app.use(
   })
 );
 
-// API Routes
+// ✅ Logging middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/admin", adminRoutes);              // Ensure internal paths use /admin/...
+app.use("/api/admin", adminRoutes);
 app.use("/api/admin", adminProductRoutes);
 app.use("/api/admin", categoryRoutes);
 app.use("/api/products", productRoutes);
@@ -44,26 +51,20 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/users", users);
 
-// Logging middleware
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
-  next();
-});
-
-// Test route
+// ✅ Test route
 app.get("/test", (req, res) => {
   res.json({ message: "Server is running" });
 });
 
-// Catch-all for unhandled routes
-app.use((req, res, next) => {
+// ✅ Catch-all for unhandled routes
+app.use((req, res) => {
   console.log("Unhandled request:", req.method, req.originalUrl);
   res.status(404).json({ message: "Route not found" });
 });
 
 const PORT = process.env.PORT || 5002;
 
-// Initialize DB, then start server
+// ✅ Initialize DB, then start server
 initializeDatabase(pool)
   .then(() => {
     app.listen(PORT, () => {
@@ -73,7 +74,7 @@ initializeDatabase(pool)
     });
   })
   .catch((err) => {
-    console.error('Failed to initialize database:', err);
+    console.error("❌ Failed to initialize database:", err);
     process.exit(1);
   });
 

@@ -4,22 +4,26 @@ services:
     env: node
     rootDir: backend
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
         value: postgresql://alchemist:2kX8FNPzloQELdSD5GYCJC2q3Bnqcqnb@dpg-d16hp66mcj7s73c5m5e0-a.oregon-postgres.render.com/electronics_catalogs
-      # Add your DB and SMTP env vars in the Render dashboard
+      # You may optionally add SMTP credentials via dashboard or here:
+      # - key: SMTP_USER
+      #   value: your_email@example.com
+      # - key: SMTP_PASS
+      #   value: your_email_password
 
   - type: web
     name: frontend
-    env: node
+    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
-    startCommand: serve -s build -l $PORT
+    staticPublishPath: build
     envVars:
       - key: NODE_ENV
         value: production
       - key: REACT_APP_API_URL
-        value: https://ars-commercess.onrender.com 
+        value: https://ars-commercess.onrender.com

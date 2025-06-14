@@ -7,7 +7,7 @@ const adminAuth = require("../middleware/adminAuth");
 // Get all categories
 router.get("/categories", auth, adminAuth, async (req, res) => {
   try {
-    const [categories] = await db.query("SELECT * FROM categories");
+    const { rows: categories } = await db.query("SELECT * FROM categories");
     res.json(categories);
   } catch (error) {
     console.error("Error fetching categories:", error);

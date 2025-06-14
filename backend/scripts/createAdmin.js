@@ -7,8 +7,8 @@ async function createAdminUser() {
     const adminPassword = "admin123"; // This will be stored as plain text for admin
 
     // Check if admin already exists
-    const [existingAdmins] = await db.query(
-      "SELECT * FROM users WHERE email = ?",
+    const { rows: existingAdmins } = await db.query(
+      "SELECT * FROM users WHERE email = $1",
       [adminEmail]
     );
 
@@ -19,7 +19,7 @@ async function createAdminUser() {
 
     // Insert admin user
     await db.query(
-      "INSERT INTO users (fullname, email, phone, password, isAdmin) VALUES (?, ?, ?, ?, ?)",
+      "INSERT INTO users (fullname, email, phone, password, isAdmin) VALUES ($1, $2, $3, $4, $5)",
       ["Admin User", adminEmail, "0000000000", adminPassword, true]
     );
 

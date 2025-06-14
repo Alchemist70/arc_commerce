@@ -1,29 +1,32 @@
-require("dotenv").config({ path: "../.env" });
 const fs = require("fs");
 const path = require("path");
-const mysql = require("mysql2/promise");
+const { Pool } = require("pg");
+require("dotenv").config();
 
 async function initializeDatabase() {
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    multipleStatements: true,
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
   });
 
   try {
     console.log("Reading SQL file...");
-    const sqlFile = path.join(__dirname, "../models/init-db.sql");
+    const sqlFile = path.join(__dirname, "../database.sql");
     const sql = fs.readFileSync(sqlFile, "utf8");
-
-    console.log("Executing SQL commands...");
-    await connection.query(sql);
+    const statements = sql.split(';').map(s => s.trim()).filter(Boolean);
+    for (const statement of statements) {
+      try {
+        await pool.query(statement);
+        console.log('Successfully executed SQL statement');
+      } catch (error) {
+        console.error('Error executing statement:', error.message);
+      }
+    }
     console.log("Database tables created successfully!");
   } catch (error) {
     console.error("Error initializing database:", error);
   } finally {
-    await connection.end();
+    await pool.end();
   }
 }
 

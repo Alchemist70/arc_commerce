@@ -5,11 +5,9 @@ const authenticateToken = require("../middleware/auth");
 
 // Get all products (public access)
 router.get("/", async (req, res) => {
-  let connection;
   try {
     console.log("Fetching products...");
-    connection = await pool.getConnection();
-    const [products] = await connection.execute("SELECT * FROM products");
+    const { rows: products } = await pool.query("SELECT * FROM products");
     console.log("Products fetched:", products);
     res.json(products);
   } catch (error) {
@@ -17,14 +15,6 @@ router.get("/", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error fetching products", error: error.message });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 
@@ -38,7 +28,7 @@ router.post("/", authenticateToken, async (req, res) => {
     connection = await pool.getConnection();
     const query = `
       INSERT INTO products (name, brand, category, price, description, image_url)
-      VALUES (?, ?, ?, ?, ?, ?)
+      VALUES ($1, $2, $3, $4, $5, $6)
     `;
 
     const [result] = await connection.execute(query, [
@@ -75,7 +65,7 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   let connection;
   try {
     connection = await pool.getConnection();
-    await connection.execute("DELETE FROM products WHERE id = ?", [
+    await connection.execute("DELETE FROM products WHERE id = $1", [
       req.params.id,
     ]);
     res.json({ message: "Product deleted successfully" });
@@ -103,20 +93,20 @@ router.post("/cart", authenticateToken, async (req, res) => {
     connection = await pool.getConnection();
     // Check if product exists in cart
     const [existingItems] = await connection.execute(
-      "SELECT * FROM cart WHERE user_id = ? AND product_id = ?",
+      "SELECT * FROM cart WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
 
     if (existingItems.length > 0) {
       // Update quantity if product exists
       await connection.execute(
-        "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?",
-        [quantity, userId, productId]
+        "UPDATE cart SET quantity = quantity + $3 WHERE user_id = $1 AND product_id = $2",
+        [userId, productId, quantity]
       );
     } else {
       // Add new item to cart
       await connection.execute(
-        "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)",
+        "INSERT INTO cart (user_id, product_id, quantity) VALUES ($1, $2, $3)",
         [userId, productId, quantity]
       );
     }
@@ -146,14 +136,14 @@ router.post("/wishlist", authenticateToken, async (req, res) => {
     connection = await pool.getConnection();
     // Check if product exists in wishlist
     const [existingItems] = await connection.execute(
-      "SELECT * FROM wishlist WHERE user_id = ? AND product_id = ?",
+      "SELECT * FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
 
     if (existingItems.length === 0) {
       // Add to wishlist if not exists
       await connection.execute(
-        "INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)",
+        "INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2)",
         [userId, productId]
       );
       res.json({ message: "Product added to wishlist successfully" });

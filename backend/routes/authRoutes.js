@@ -6,16 +6,13 @@ const pool = require("../models/db");
 const jwt = require("jsonwebtoken");
 
 router.post("/login", async (req, res) => {
-  let connection;
   try {
     const { email, password } = req.body;
     console.log("Login attempt for:", email);
 
-    connection = await pool.getConnection();
-
     // Get user from database
-    const [users] = await connection.execute(
-      "SELECT * FROM users WHERE email = ?",
+    const { rows: users } = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
       [email]
     );
 
@@ -29,7 +26,7 @@ router.post("/login", async (req, res) => {
     // Special handling for admin login
     let isValidPassword = false;
 
-    if (user.isAdmin) {
+    if (user.isadmin) {
       // For admin, direct password comparison
       isValidPassword = password === user.password;
     } else {
@@ -46,7 +43,7 @@ router.post("/login", async (req, res) => {
       userId: user.id,
       email: user.email,
       fullname: user.fullname,
-      isAdmin: Boolean(user.isAdmin),
+      isAdmin: Boolean(user.isadmin),
     };
 
     console.log("Token payload:", tokenPayload); // Log token payload for debugging
@@ -62,28 +59,20 @@ router.post("/login", async (req, res) => {
       "Login successful for:",
       email,
       "isAdmin:",
-      Boolean(user.isAdmin)
+      Boolean(user.isadmin)
     );
 
     res.json({
       message: "Login successful",
       user: {
         ...userWithoutPassword,
-        isAdmin: Boolean(user.isAdmin), // Ensure isAdmin is boolean
+        isAdmin: Boolean(user.isadmin), // Ensure isAdmin is boolean
       },
       token,
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ message: "Server error during login" });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
+    res.status(500).json({ message: "Login failed", error: error.message });
   }
 });
 
@@ -108,8 +97,8 @@ router.post("/register", async (req, res) => {
     connection = await pool.getConnection();
 
     // Check if user exists
-    const [existingUsers] = await connection.execute(
-      "SELECT * FROM users WHERE email = ?",
+    const { rows: existingUsers } = await connection.query(
+      "SELECT * FROM users WHERE email = $1",
       [email]
     );
 
@@ -121,14 +110,14 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insert new user
-    const [result] = await connection.execute(
-      "INSERT INTO users (fullname, email, phone, password) VALUES (?, ?, ?, ?)",
+    const { rows: result } = await connection.query(
+      "INSERT INTO users (fullname, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING id",
       [fullname, email, phone, hashedPassword]
     );
 
     res.status(201).json({
       message: "User registered successfully",
-      userId: result.insertId,
+      userId: result[0].id,
     });
   } catch (error) {
     console.error("Registration error:", error);

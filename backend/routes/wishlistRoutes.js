@@ -13,10 +13,10 @@ router.get("/", authenticateToken, async (req, res) => {
       SELECT w.*, p.name, p.brand, p.price, p.image_url, p.description
       FROM wishlist w
       JOIN products p ON w.product_id = p.id
-      WHERE w.user_id = ?
+      WHERE w.user_id = $1
     `;
 
-    const [wishlistItems] = await db.query(query, [userId]);
+    const { rows: wishlistItems } = await db.query(query, [userId]);
     res.json(wishlistItems);
   } catch (error) {
     console.error("Error fetching wishlist items:", error);
@@ -32,7 +32,7 @@ router.post("/", authenticateToken, async (req, res) => {
     console.log("Adding to wishlist for user:", userId, "product:", productId);
 
     // Check if product exists
-    const [products] = await db.query("SELECT * FROM products WHERE id = ?", [
+    const [products] = await db.query("SELECT * FROM products WHERE id = $1", [
       productId,
     ]);
     if (products.length === 0) {
@@ -41,7 +41,7 @@ router.post("/", authenticateToken, async (req, res) => {
 
     // Check if item already exists in wishlist
     const [existingItems] = await db.query(
-      "SELECT * FROM wishlist WHERE user_id = ? AND product_id = ?",
+      "SELECT * FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
 
@@ -50,7 +50,7 @@ router.post("/", authenticateToken, async (req, res) => {
     }
 
     // Add new item to wishlist
-    await db.query("INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)", [
+    await db.query("INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2)", [
       userId,
       productId,
     ]);
@@ -69,7 +69,7 @@ router.delete("/:productId", authenticateToken, async (req, res) => {
     const userId = req.user.userId;
 
     const [result] = await db.query(
-      "DELETE FROM wishlist WHERE user_id = ? AND product_id = ?",
+      "DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
 

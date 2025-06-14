@@ -1,20 +1,9 @@
 require("dotenv").config();
-const mysql = require("mysql2/promise");
+const { Pool } = require("pg");
 
-let pool;
-if (process.env.MYSQL_URL) {
-  // Use connection string if available (Railway, etc.)
-  pool = mysql.createPool(process.env.MYSQL_URL);
-} else {
-  pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'electronics_catalogs',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-  });
-}
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
 module.exports = pool;

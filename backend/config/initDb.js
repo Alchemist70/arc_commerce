@@ -9,8 +9,8 @@ async function initializeDatabase(pool) {
     // Split the SQL file into individual statements
     const statements = sqlFile
       .split(';')
-      .filter(statement => statement.trim())
-      .map(statement => statement + ';');
+      .map(s => s.trim())
+      .filter(Boolean);
 
     // Execute each statement
     for (const statement of statements) {
@@ -18,12 +18,8 @@ async function initializeDatabase(pool) {
         await pool.query(statement);
         console.log('Successfully executed SQL statement');
       } catch (error) {
-        // Skip errors for duplicate tables/entries
-        if (error.code === 'ER_TABLE_EXISTS_ERROR' || error.code === 'ER_DUP_ENTRY') {
-          console.log('Table or entry already exists, skipping...');
-          continue;
-        }
-        throw error;
+        // Log and continue on error (e.g., table already exists)
+        console.error('Error executing statement:', error.message);
       }
     }
     

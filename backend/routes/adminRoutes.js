@@ -33,110 +33,13 @@ router.put("/users/:userId/toggle-admin", auth, adminAuth, async (req, res) => {
 
 // Get all orders (admin only)
 router.get("/orders", auth, adminAuth, async (req, res) => {
-  console.log("Received request for admin orders");
-  console.log("User:", req.user);
-
-  let connection;
   try {
-    console.log("Getting database connection...");
-    connection = await pool.getConnection();
-    console.log("Database connection acquired");
-
-    // First, check if the orders table exists
-    console.log("Checking if orders table exists...");
-    const [tables] = await connection.execute("SHOW TABLES LIKE 'orders'");
-    console.log("Tables check result:", tables);
-
-    if (tables.length === 0) {
-      console.log("Orders table does not exist!");
-      return res.status(500).json({ message: "Orders table does not exist" });
-    }
-
-    // Check table structure
-    console.log("Checking orders table structure...");
-    const [columns] = await connection.execute("DESCRIBE orders");
-    console.log("Orders table columns:", columns);
-
     // Simple query first
-    console.log("Executing simple orders query...");
-    const [orders] = await connection.execute("SELECT * FROM orders");
-    console.log("Found", orders.length, "orders");
-
-    if (orders.length === 0) {
-      console.log("No orders found");
-      return res.json([]);
-    }
-
-    // Now get additional details
-    const enrichedOrders = [];
-    for (const order of orders) {
-      console.log("Processing order:", order.id);
-
-      // Get user details
-      const [users] = await connection.execute(
-        "SELECT email, fullname FROM users WHERE id = ?",
-        [order.user_id]
-      );
-      const user = users[0] || {};
-
-      // Get order items
-      const [items] = await connection.execute(
-        `SELECT oi.*, p.name as product_name, p.image_url
-         FROM order_items oi
-         JOIN products p ON oi.product_id = p.id
-         WHERE oi.order_id = ?`,
-        [order.id]
-      );
-
-      // Get payment status
-      const [payments] = await connection.execute(
-        "SELECT status FROM payments WHERE order_id = ?",
-        [order.id]
-      );
-      const payment = payments[0] || {};
-
-      enrichedOrders.push({
-        order_id: order.id,
-        user_id: order.user_id,
-        total_amount: order.total_amount,
-        shipping_address: order.shipping_address,
-        order_date: order.created_at,
-        status: order.status,
-        user_email: user.email,
-        first_name: user.fullname?.split(" ")[0] || "",
-        last_name: user.fullname?.split(" ")[1] || "",
-        payment_status: payment.status || "pending",
-        items: items,
-      });
-    }
-
-    console.log(
-      "Sending response with",
-      enrichedOrders.length,
-      "enriched orders"
-    );
-    res.json(enrichedOrders);
+    const { rows: orders } = await pool.query("SELECT orders.*, users.fullname FROM orders JOIN users ON orders.user_id = users.id");
+    res.json(orders);
   } catch (error) {
-    console.error("Error details:", {
-      message: error.message,
-      stack: error.stack,
-      code: error.code,
-      sqlState: error.sqlState,
-      sqlMessage: error.sqlMessage,
-    });
-    res
-      .status(500)
-      .json({ message: "Error fetching orders", error: error.message });
-  } finally {
-    if (connection) {
-      try {
-        console.log("Releasing database connection");
-        await connection.release();
-        console.log("Database connection released");
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ message: "Error fetching orders" });
   }
 });
 

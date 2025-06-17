@@ -99,18 +99,18 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Check admin code
-    const isAdmin = admin_code === process.env.ADMIN_SIGNUP_CODE;
+    const isAdmin = Boolean(admin_code && admin_code === process.env.ADMIN_SIGNUP_CODE);
 
     // Insert new user with is_admin, created_at, updated_at
     const { rows: result } = await pool.query(
       "INSERT INTO users (fullname, email, phone, password, is_admin, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id, is_admin",
-      [fullname, email, phone, hashedPassword, isAdmin]
+      [fullname, email, phone, hashedPassword, isAdmin === true]
     );
 
     res.status(201).json({
       message: "User registered successfully",
       userId: result[0].id,
-      isAdmin: result[0].is_admin,
+      isAdmin: Boolean(result[0].is_admin),
     });
   } catch (error) {
     console.error("Registration error:", error);

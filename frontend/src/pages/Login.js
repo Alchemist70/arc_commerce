@@ -75,7 +75,7 @@ const Login = () => {
       });
 
       // Check if user data contains isAdmin property
-      if (data.user && data.user.is_admin) {
+      if (data.user && (data.user.isAdmin || data.user.is_admin)) {
         console.log("Admin user detected, redirecting to admin panel");
         navigate("/admin");
       } else {

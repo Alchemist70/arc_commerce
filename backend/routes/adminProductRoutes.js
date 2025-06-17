@@ -7,7 +7,7 @@ const adminAuth = require("../middleware/adminAuth");
 // Get all products (admin only)
 router.get("/products", auth, adminAuth, async (req, res) => {
   try {
-    const [products] = await db.query("SELECT * FROM products");
+    const { rows: products } = await db.query("SELECT * FROM products");
     res.json(products);
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -19,15 +19,13 @@ router.get("/products", auth, adminAuth, async (req, res) => {
 router.post("/products", auth, adminAuth, async (req, res) => {
   try {
     const { name, brand, category, price, description, image_url } = req.body;
-
-    const [result] = await db.query(
-      "INSERT INTO products (name, brand, category, price, description, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+    const { rows } = await db.query(
+      "INSERT INTO products (name, brand, category, price, description, image_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
       [name, brand, category, price, description, image_url]
     );
-
     res.status(201).json({
       message: "Product added successfully",
-      productId: result.insertId,
+      productId: rows[0].id,
     });
   } catch (error) {
     console.error("Error adding product:", error);
@@ -38,14 +36,10 @@ router.post("/products", auth, adminAuth, async (req, res) => {
 // Delete product (admin only)
 router.delete("/products/:id", auth, adminAuth, async (req, res) => {
   try {
-    const [result] = await db.query("DELETE FROM products WHERE id = ?", [
-      req.params.id,
-    ]);
-
-    if (result.affectedRows === 0) {
+    const { rowCount } = await db.query("DELETE FROM products WHERE id = $1", [req.params.id]);
+    if (rowCount === 0) {
       return res.status(404).json({ message: "Product not found" });
     }
-
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);

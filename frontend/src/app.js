@@ -27,6 +27,7 @@ import Payment from "./pages/Payment";
 import AppLayout from "./components/AppLayout";
 import AdminLogin from "./pages/AdminLogin";
 import AdminSignup from "./pages/AdminSignup";
+import CategoryManagement from "./components/CategoryManagement";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -113,7 +114,7 @@ const App = () => {
               <Route path="products" element={<ProductManagement />} />
               <Route path="users" element={<UserManagement />} />
               <Route path="orders" element={<AdminOrders />} />
-              <Route path="categories" element={<ProductManagement />} />
+              <Route path="categories" element={<CategoryManagement />} />
             </Route>
 
             <Route path="/admin-login" element={<AdminLogin />} />

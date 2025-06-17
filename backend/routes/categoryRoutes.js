@@ -19,13 +19,11 @@ router.get("/categories", auth, adminAuth, async (req, res) => {
 router.post("/categories", auth, adminAuth, async (req, res) => {
   try {
     const { name, description } = req.body;
-    const [result] = await db.query(
-      "INSERT INTO categories (name, description) VALUES (?, ?)",
+    const { rows } = await db.query(
+      "INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING id",
       [name, description]
     );
-    res
-      .status(201)
-      .json({ message: "Category added successfully", id: result.insertId });
+    res.status(201).json({ message: "Category added successfully", id: rows[0].id });
   } catch (error) {
     console.error("Error adding category:", error);
     res.status(500).json({ message: "Error adding category" });

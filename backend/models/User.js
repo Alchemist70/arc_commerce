@@ -3,9 +3,7 @@ const db = require("./db");
 class User {
   static async findByEmail(email) {
     try {
-      const [rows] = await db.query("SELECT * FROM users WHERE email = ?", [
-        email,
-      ]);
+      const { rows } = await db.query("SELECT * FROM users WHERE email = $1", [email]);
       return rows[0];
     } catch (error) {
       throw error;
@@ -14,7 +12,7 @@ class User {
 
   static async findAll() {
     try {
-      const [rows] = await db.query(
+      const { rows } = await db.query(
         "SELECT id, fullname, email, is_admin FROM users"
       );
       return rows;
@@ -24,21 +22,24 @@ class User {
   }
 
   static async createAdmin(user) {
-    return new Promise((resolve, reject) => {
-      db.query("INSERT INTO users SET ?", user, (err, results) => {
-        if (err) reject(err);
-        resolve(results);
-      });
-    });
+    try {
+      const { rows } = await db.query(
+        "INSERT INTO users (fullname, email, phone, password, is_admin, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *",
+        [user.fullname, user.email, user.phone, user.password, true]
+      );
+      return rows[0];
+    } catch (error) {
+      throw error;
+    }
   }
 
   static async toggleAdminStatus(userId) {
     try {
-      const [result] = await db.query(
-        "UPDATE users SET is_admin = NOT is_admin WHERE id = ?",
+      const { rowCount } = await db.query(
+        "UPDATE users SET is_admin = NOT is_admin WHERE id = $1",
         [userId]
       );
-      return result;
+      return { affectedRows: rowCount };
     } catch (error) {
       throw error;
     }

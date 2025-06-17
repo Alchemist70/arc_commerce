@@ -125,7 +125,7 @@ const Cart = () => {
     }
   };
 
-  const updateQuantity = async (productId, newQuantity) => {
+  const updateQuantity = async (cartItemId, newQuantity) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -134,21 +134,20 @@ const Cart = () => {
       }
 
       if (newQuantity < 1) {
-        await removeFromCart(productId);
+        await removeFromCart(cartItemId);
         return;
       }
 
       const response = await api.put(
-        `/api/cart/${productId}`,
+        `/api/cart/${cartItemId}`,
         { quantity: newQuantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.status === 200) {
-        // Update the cart items state with the new quantity
-        setCartItems(prevItems => 
-          prevItems.map(item => 
-            item.id === productId 
+        setCartItems(prevItems =>
+          prevItems.map(item =>
+            item.id === cartItemId
               ? { ...item, quantity: newQuantity }
               : item
           )
@@ -162,24 +161,21 @@ const Cart = () => {
         error.response?.data?.message ||
           "Failed to update quantity. Please try again."
       );
-      // Refresh cart to ensure we have the correct state
       fetchCartItems();
     }
   };
 
-  const removeFromCart = async (productId) => {
-    // Ask for confirmation before removing
+  const removeFromCart = async (cartItemId) => {
     const confirmed = window.confirm("Are you sure you want to remove this item from your cart?");
     if (!confirmed) return;
-    // Optimistically update UI
-    setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
+    setCartItems(prevItems => prevItems.filter(item => item.id !== cartItemId));
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         setError("Please log in to manage your cart");
         return;
       }
-      const response = await api.delete(`/api/cart/${productId}`, {
+      const response = await api.delete(`/api/cart/${cartItemId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.status !== 200) {
@@ -191,7 +187,6 @@ const Cart = () => {
         error.response?.data?.message ||
           "Failed to remove item from cart. Please try again."
       );
-      // Refresh cart to ensure we have the correct state
       fetchCartItems();
     }
   };
@@ -276,7 +271,7 @@ const Cart = () => {
                 </div>
                 <button
                   className="remove-btn"
-                  onClick={() => removeFromCart(item.productId)}
+                  onClick={() => removeFromCart(item.id)}
                 >
                   Remove
                 </button>

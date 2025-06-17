@@ -211,7 +211,6 @@ router.post("/", authenticateToken, async (req, res) => {
 
 // Update Cart Item Quantity
 router.put("/:productId", authenticateToken, async (req, res) => {
-  let connection;
   try {
     const userId = req.user.userId;
     const { productId } = req.params;
@@ -221,52 +220,41 @@ router.put("/:productId", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "Invalid quantity" });
     }
 
-    connection = await pool.getConnection();
-    await connection.execute(
-      "UPDATE cart SET quantity = ? WHERE user_id = ? AND product_id = ?",
+    const { rowCount } = await pool.query(
+      "UPDATE cart SET quantity = $1 WHERE user_id = $2 AND product_id = $3",
       [quantity, userId, productId]
     );
+
+    if (rowCount === 0) {
+      return res.status(404).json({ message: "Cart item not found" });
+    }
 
     res.json({ message: "Cart updated successfully" });
   } catch (error) {
     console.error("Cart error:", error);
     res.status(500).json({ message: "Failed to update cart" });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 
 // Remove from Cart
 router.delete("/:productId", authenticateToken, async (req, res) => {
-  let connection;
   try {
     const userId = req.user.userId;
     const { productId } = req.params;
 
-    connection = await pool.getConnection();
-    await connection.execute(
-      "DELETE FROM cart WHERE user_id = ? AND product_id = ?",
+    const { rowCount } = await pool.query(
+      "DELETE FROM cart WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
+
+    if (rowCount === 0) {
+      return res.status(404).json({ message: "Cart item not found" });
+    }
 
     res.json({ message: "Item removed from cart" });
   } catch (error) {
     console.error("Cart error:", error);
     res.status(500).json({ message: "Failed to remove item from cart" });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 

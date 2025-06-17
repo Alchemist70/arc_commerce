@@ -91,12 +91,17 @@ const Cart = () => {
       }
 
       setCartItems(
-        response.data.map(item => ({
-          ...item,
-          id: item.cart_item_id,         // cart item id for React keys
-          productId: item.product_id,    // real product id for orders
-          product_id: item.product_id    // also set product_id for safety
-        }))
+        response.data.map(item => {
+          const productId = Number(item.product_id) || Number(item.productId) || Number(item.id) || 0;
+          const mapped = {
+            ...item,
+            id: item.cart_item_id,
+            productId,
+            product_id: productId,
+          };
+          console.log('[Cart] mapped cart item:', mapped);
+          return mapped;
+        })
       );
       setError(null);
     } catch (error) {

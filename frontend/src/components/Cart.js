@@ -125,7 +125,7 @@ const Cart = () => {
     }
   };
 
-  const updateQuantity = async (cartItemId, newQuantity) => {
+  const updateQuantity = async (productId, newQuantity) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -134,12 +134,12 @@ const Cart = () => {
       }
 
       if (newQuantity < 1) {
-        await removeFromCart(cartItemId);
+        await removeFromCart(productId);
         return;
       }
 
       const response = await api.put(
-        `/api/cart/${cartItemId}`,
+        `/api/cart/${productId}`,
         { quantity: newQuantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -147,7 +147,7 @@ const Cart = () => {
       if (response.status === 200) {
         setCartItems(prevItems =>
           prevItems.map(item =>
-            item.id === cartItemId
+            item.productId === productId
               ? { ...item, quantity: newQuantity }
               : item
           )
@@ -165,17 +165,17 @@ const Cart = () => {
     }
   };
 
-  const removeFromCart = async (cartItemId) => {
+  const removeFromCart = async (productId) => {
     const confirmed = window.confirm("Are you sure you want to remove this item from your cart?");
     if (!confirmed) return;
-    setCartItems(prevItems => prevItems.filter(item => item.id !== cartItemId));
+    setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         setError("Please log in to manage your cart");
         return;
       }
-      const response = await api.delete(`/api/cart/${cartItemId}`, {
+      const response = await api.delete(`/api/cart/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.status !== 200) {
@@ -257,21 +257,21 @@ const Cart = () => {
                 <p className="price">${item.price}</p>
                 <div className="quantity-controls">
                   <button
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                     disabled={item.quantity <= 1}
                   >
                     -
                   </button>
                   <span>{item.quantity}</span>
                   <button
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                   >
                     +
                   </button>
                 </div>
                 <button
                   className="remove-btn"
-                  onClick={() => removeFromCart(item.id)}
+                  onClick={() => removeFromCart(item.productId)}
                 >
                   Remove
                 </button>

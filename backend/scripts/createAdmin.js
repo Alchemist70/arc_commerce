@@ -19,8 +19,8 @@ async function createAdminUser() {
 
     // Insert admin user
     await db.query(
-      "INSERT INTO users (fullname, email, phone, password, is_admin) VALUES ($1, $2, $3, $4, $5)",
-      ["Admin User", adminEmail, "0000000000", adminPassword, true]
+      "INSERT INTO users (fullname, email, phone, password) VALUES ($1, $2, $3, $4)",
+      ["Admin User", adminEmail, "0000000000", adminPassword]
     );
 
     console.log("Admin user created successfully");

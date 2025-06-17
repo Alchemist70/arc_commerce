@@ -15,8 +15,7 @@ const SignupForm = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    phone: "",
-    admin_code: ""
+    phone: ""
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -70,7 +69,6 @@ const SignupForm = () => {
           email: formData.email,
           phone: formData.phone,
           password: formData.password,
-          admin_code: formData.admin_code || undefined,
         }),
         // Add timeout to prevent hanging
         signal: AbortSignal.timeout(8000),
@@ -184,17 +182,6 @@ const SignupForm = () => {
                 value={formData.phone}
                 onChange={handleChange}
                 required
-              />
-            </div>
-
-            <div className="input-group">
-              <label>Admin Code (optional)</label>
-              <input
-                type="text"
-                name="admin_code"
-                value={formData.admin_code}
-                onChange={handleChange}
-                placeholder="Enter admin code if you have one"
               />
             </div>
 

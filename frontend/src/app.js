@@ -26,6 +26,7 @@ import OrderSummary from "./components/OrderSummary";
 import Payment from "./pages/Payment";
 import AppLayout from "./components/AppLayout";
 import AdminLogin from "./pages/AdminLogin";
+import AdminSignup from "./pages/AdminSignup";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -116,6 +117,7 @@ const App = () => {
             </Route>
 
             <Route path="/admin-login" element={<AdminLogin />} />
+            <Route path="/admin-signup" element={<AdminSignup />} />
 
             {/* Catch-all route for 404 */}
             <Route path="*" element={<Navigate to="/" replace />} />

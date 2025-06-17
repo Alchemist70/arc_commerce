@@ -74,39 +74,61 @@ router.get("/test", (req, res) => {
   res.json({ message: "Auth routes are working" });
 });
 
-// ------------------ REGISTER ------------------
-router.post("/register", async (req, res) => {
+// ------------------ ADMIN REGISTER ------------------
+router.post("/admin-register", async (req, res) => {
   try {
-    console.log("Registration request received:", req.body);
-
-    const { fullname, email, phone, password, admin_code } = req.body;
-
+    const { fullname, email, phone, password } = req.body;
     if (!fullname || !email || !phone || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
-
     // Check if user exists
     const { rows: existingUsers } = await pool.query(
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
-
     if (existingUsers.length > 0) {
       return res.status(400).json({ message: "Email already registered" });
     }
-
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Check admin code
-    const isAdmin = Boolean(admin_code && admin_code === process.env.ADMIN_SIGNUP_CODE);
-
-    // Insert new user with is_admin, created_at, updated_at
+    // Insert new admin user
     const { rows: result } = await pool.query(
       "INSERT INTO users (fullname, email, phone, password, is_admin, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id, is_admin",
-      [fullname, email, phone, hashedPassword, isAdmin === true]
+      [fullname, email, phone, hashedPassword, true]
     );
+    res.status(201).json({
+      message: "Admin registered successfully",
+      userId: result[0].id,
+      isAdmin: Boolean(result[0].is_admin),
+    });
+  } catch (error) {
+    console.error("Admin registration error:", error);
+    res.status(500).json({ message: "Server error during admin registration" });
+  }
+});
 
+// ------------------ REGISTER ------------------
+router.post("/register", async (req, res) => {
+  try {
+    const { fullname, email, phone, password } = req.body;
+    if (!fullname || !email || !phone || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    // Check if user exists
+    const { rows: existingUsers } = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+    if (existingUsers.length > 0) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // Insert new user (not admin)
+    const { rows: result } = await pool.query(
+      "INSERT INTO users (fullname, email, phone, password, is_admin, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id, is_admin",
+      [fullname, email, phone, hashedPassword, false]
+    );
     res.status(201).json({
       message: "User registered successfully",
       userId: result[0].id,

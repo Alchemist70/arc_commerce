@@ -18,7 +18,7 @@ const AdminLogin = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Login failed");
-      if (!data.user.isAdmin && !data.user.is_admin) {
+      if (!data.user.is_admin) {
         setError("You are not an admin.");
         return;
       }

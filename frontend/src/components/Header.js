@@ -15,6 +15,7 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
 const Header = () => {
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,6 +83,15 @@ const Header = () => {
     }
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchTerm.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+    } else {
+      navigate("/products");
+    }
+  };
+
   return (
     <header className="top-header">
       <div className="header-container">
@@ -100,8 +110,11 @@ const Header = () => {
             type="text"
             className="search-bar"
             placeholder="What are you looking for today?"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") handleSearch(e); }}
           />
-          <button className="search-button">Search</button>
+          <button className="search-button" onClick={handleSearch}>Search</button>
         </div>
 
         <div className="header-buttons">

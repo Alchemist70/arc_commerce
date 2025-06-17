@@ -186,3 +186,40 @@
     justify-content: space-between;
   }
 }
+
+@media (max-width: 600px) {
+  .header-container {
+    flex-direction: column;
+    gap: 10px;
+    width: 98%;
+    padding: 0 2vw;
+  }
+  .search-container {
+    width: 100%;
+    margin: 10px 0;
+    max-width: 100%;
+  }
+  .search-bar {
+    font-size: 16px;
+    padding: 12px 10px;
+  }
+  .search-button {
+    padding: 12px 18px;
+    font-size: 16px;
+  }
+  .header-buttons {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    align-items: stretch;
+  }
+  .nav-icons {
+    gap: 10px;
+    justify-content: space-between;
+  }
+  .top-header {
+    height: auto;
+    min-height: 50px;
+    padding: 8px 0 4px 0;
+  }
+}

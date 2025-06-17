@@ -2,16 +2,21 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/ProductList.css";
 import ProductCard from "./ProductCard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Use environment variable for API URL
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5002";
+
+  // Get search term from URL
+  const searchParams = new URLSearchParams(location.search);
+  const searchTerm = searchParams.get("search")?.toLowerCase() || "";
 
   useEffect(() => {
     fetchProducts();
@@ -136,6 +141,16 @@ const ProductList = () => {
     }
   };
 
+  // Filter products by search term
+  const filteredProducts = searchTerm
+    ? products.filter(
+        (product) =>
+          product.name?.toLowerCase().includes(searchTerm) ||
+          product.brand?.toLowerCase().includes(searchTerm) ||
+          product.description?.toLowerCase().includes(searchTerm)
+      )
+    : products;
+
   if (loading) return <div className="loading">Loading products...</div>;
   if (error) return <div className="error">{error}</div>;
 
@@ -143,14 +158,20 @@ const ProductList = () => {
     <div className="product-list">
       <h2>Our Products</h2>
       <div className="products-grid">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            onAddToCart={addToCart}
-            onAddToWishlist={addToWishlist}
-          />
-        ))}
+        {filteredProducts.length > 0 ? (
+          filteredProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddToCart={addToCart}
+              onAddToWishlist={addToWishlist}
+            />
+          ))
+        ) : (
+          <div className="no-products">
+            <p>No products found.</p>
+          </div>
+        )}
       </div>
     </div>
   );

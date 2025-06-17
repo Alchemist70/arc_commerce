@@ -13,11 +13,9 @@ router.post("/", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "Product ID is required" });
     }
 
-    const connection = await db();
-
     // Check if item already exists in wishlist
-    const [existing] = await connection.execute(
-      "SELECT * FROM wishlist WHERE user_id = ? AND product_id = ?",
+    const { rows: existing } = await db.query(
+      "SELECT * FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
 
@@ -25,8 +23,8 @@ router.post("/", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "Item already in wishlist" });
     }
 
-    await connection.execute(
-      "INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)",
+    await db.query(
+      "INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2)",
       [userId, productId]
     );
 
@@ -41,13 +39,11 @@ router.post("/", authenticateToken, async (req, res) => {
 router.get("/", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.id; // Get user ID from JWT token
-    const connection = await db();
-
-    const [items] = await connection.execute(
+    const { rows: items } = await db.query(
       `SELECT p.* 
        FROM products p 
        JOIN wishlist w ON p.id = w.product_id 
-       WHERE w.user_id = ?`,
+       WHERE w.user_id = $1`,
       [userId]
     );
 
@@ -64,11 +60,14 @@ router.delete("/:productId", authenticateToken, async (req, res) => {
     const userId = req.user.id;
     const { productId } = req.params;
 
-    const connection = await db();
-    await connection.execute(
-      "DELETE FROM wishlist WHERE user_id = ? AND product_id = ?",
+    const result = await db.query(
+      "DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: "Wishlist item not found" });
+    }
 
     res.json({ message: "Item removed from wishlist" });
   } catch (error) {

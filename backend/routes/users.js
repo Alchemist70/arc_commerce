@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/userModel');
 const auth = require('../middleware/auth');
+const pool = require('../models/db');
 
 router.post('/wishlist', (req, res) => {
     const { userId, productId } = req.body;
@@ -31,8 +32,8 @@ router.post('/address', auth, async (req, res) => {
 
   try {
     // ✅ fetch user email and phone first
-    const sql = 'SELECT email, phone FROM users WHERE id = ?';
-    const [results] = await require('../models/db').query(sql, [userId]);
+    const sql = 'SELECT email, phone FROM users WHERE id = $1';
+    const { rows: results } = await pool.query(sql, [userId]);
 
     if (!results || results.length === 0) {
       return res.status(404).json({ message: 'User not found' });

@@ -126,6 +126,8 @@ const Cart = () => {
   };
 
   const updateQuantity = async (productId, newQuantity) => {
+    productId = parseInt(productId, 10);
+    console.log("[Cart] updateQuantity called", { productId, type: typeof productId, newQuantity });
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -161,11 +163,14 @@ const Cart = () => {
         error.response?.data?.message ||
           "Failed to update quantity. Please try again."
       );
+    } finally {
       fetchCartItems();
     }
   };
 
   const removeFromCart = async (productId) => {
+    productId = parseInt(productId, 10);
+    console.log("[Cart] removeFromCart called", { productId, type: typeof productId });
     const confirmed = window.confirm("Are you sure you want to remove this item from your cart?");
     if (!confirmed) return;
     setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
@@ -187,6 +192,7 @@ const Cart = () => {
         error.response?.data?.message ||
           "Failed to remove item from cart. Please try again."
       );
+    } finally {
       fetchCartItems();
     }
   };

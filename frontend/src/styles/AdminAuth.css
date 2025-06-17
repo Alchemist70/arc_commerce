@@ -1,0 +1,87 @@
+/* AdminAuth.css - Professional styling for admin login and registration */
+
+.admin-auth-bg {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1565c0 0%, #43cea2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-auth-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.15);
+  padding: 40px 32px 32px 32px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 0.7s;
+}
+
+.admin-auth-title {
+  color: #1565c0;
+  font-size: 2rem;
+  margin-bottom: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.admin-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-auth-input {
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.admin-auth-input:focus {
+  border-color: #43cea2;
+  outline: none;
+}
+
+.admin-auth-btn {
+  background: linear-gradient(90deg, #1565c0 0%, #43cea2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 8px;
+}
+
+.admin-auth-btn:hover {
+  background: linear-gradient(90deg, #43cea2 0%, #1565c0 100%);
+}
+
+.admin-auth-error {
+  color: #d32f2f;
+  background: #fff5f5;
+  border-radius: 4px;
+  padding: 8px 0;
+  margin-top: 4px;
+  font-size: 0.98rem;
+}
+
+.admin-auth-success {
+  color: #388e3c;
+  background: #e8f5e9;
+  border-radius: 4px;
+  padding: 8px 0;
+  margin-top: 4px;
+  font-size: 0.98rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+} 

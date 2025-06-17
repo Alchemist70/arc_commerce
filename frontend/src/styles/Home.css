@@ -68,3 +68,39 @@ body {
   border: 1px solid #ddd;
   margin-bottom: 10px;
 }
+
+@media (max-width: 1024px) {
+  .home-container {
+    width: 98%;
+    padding-top: 160px;
+  }
+  .product-section, .wishlist-section {
+    width: 95%;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    width: 100%;
+    padding-top: 120px;
+  }
+  .product-section, .wishlist-section {
+    width: 100%;
+    margin: 10px auto;
+    padding: 8px;
+    font-size: 0.98rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-container {
+    padding-top: 90px;
+  }
+  .product-section, .wishlist-section {
+    width: 100%;
+    margin: 6px auto;
+    padding: 4px;
+    font-size: 0.93rem;
+  }
+}

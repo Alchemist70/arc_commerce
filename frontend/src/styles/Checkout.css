@@ -204,6 +204,12 @@
   background: linear-gradient(90deg, #1565c0 0%, #1976d2 100%);
 }
 
+@media (max-width: 1024px) {
+  .checkout-container {
+    max-width: 90vw;
+    padding: 1.5rem 1rem;
+  }
+}
 @media (max-width: 768px) {
   .checkout-container {
     max-width: 98vw;
@@ -213,5 +219,14 @@
   .checkout-form, .checkout-success {
     max-width: 98vw;
     padding: 1.2rem 0.5rem;
+  }
+}
+@media (max-width: 480px) {
+  .checkout-container {
+    padding: 0.5rem 0.2rem;
+  }
+  .checkout-form, .checkout-success {
+    padding: 0.7rem 0.2rem;
+    font-size: 0.95rem;
   }
 }

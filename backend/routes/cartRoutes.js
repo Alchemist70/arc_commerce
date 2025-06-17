@@ -51,7 +51,6 @@ router.get("/test", async (req, res) => {
 
 // Get Cart Items
 router.get("/", authenticateToken, async (req, res) => {
-  let connection;
   try {
     console.log("GET /cart - Auth user info:", {
       user: req.user,
@@ -64,11 +63,9 @@ router.get("/", authenticateToken, async (req, res) => {
       return res.status(401).json({ message: "User ID not found in token" });
     }
 
-    connection = await pool.getConnection();
-
     // First, check if the user exists
-    const [userExists] = await connection.execute(
-      "SELECT id FROM users WHERE id = ?",
+    const { rows: userExists } = await pool.query(
+      "SELECT id FROM users WHERE id = $1",
       [userId]
     );
 
@@ -92,11 +89,11 @@ router.get("/", authenticateToken, async (req, res) => {
         p.category
       FROM cart c
       LEFT JOIN products p ON c.product_id = p.id
-      WHERE c.user_id = ?
+      WHERE c.user_id = $1
     `;
 
     console.log("Executing cart query for user:", userId);
-    const [items] = await connection.execute(query, [userId]);
+    const { rows: items } = await pool.query(query, [userId]);
 
     // Log the raw items for debugging
     console.log("Raw cart items:", JSON.stringify(items, null, 2));
@@ -134,14 +131,6 @@ router.get("/", authenticateToken, async (req, res) => {
       error: error.message,
       details: error.sqlMessage,
     });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 

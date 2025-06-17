@@ -30,7 +30,7 @@ const AdminOrders = () => {
       console.log("Auth state:", {
         token: token ? "Present" : "Missing",
         user: user ? "Present" : "Missing",
-        isAdmin: user?.isAdmin,
+        isAdmin: user?.is_admin,
       });
 
       if (!token || !user) {
@@ -39,7 +39,7 @@ const AdminOrders = () => {
         return;
       }
 
-      if (!user.isAdmin) {
+      if (!user.is_admin) {
         console.log("User is not an admin");
         setError("Access denied. Admin privileges required.");
         setLoading(false);

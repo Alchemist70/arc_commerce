@@ -8,12 +8,12 @@ const AdminRoute = ({ children }) => {
   useEffect(() => {
     console.log("AdminRoute check:", {
       user: user ? "Present" : "Missing",
-      isAdmin: user?.isAdmin,
+      isAdmin: user?.is_admin,
       path: location.pathname,
     });
   }, [location.pathname, user]);
 
-  if (!user || !user.isAdmin) {
+  if (!user || !user.is_admin) {
     console.log("Unauthorized access attempt to admin route");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

@@ -25,7 +25,7 @@ router.post("/login", async (req, res) => {
 
     let isValidPassword = false;
 
-    if (user.isadmin) {
+    if (user.is_admin) {
       isValidPassword = password === user.password;
     } else {
       isValidPassword = await bcrypt.compare(password, user.password);
@@ -39,7 +39,7 @@ router.post("/login", async (req, res) => {
       userId: user.id,
       email: user.email,
       fullname: user.fullname,
-      isAdmin: Boolean(user.isadmin),
+      isAdmin: Boolean(user.is_admin),
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
@@ -52,14 +52,14 @@ router.post("/login", async (req, res) => {
       "Login successful for:",
       email,
       "isAdmin:",
-      Boolean(user.isadmin)
+      Boolean(user.is_admin)
     );
 
     res.json({
       message: "Login successful",
       user: {
         ...userWithoutPassword,
-        isAdmin: Boolean(user.isadmin),
+        isAdmin: Boolean(user.is_admin),
       },
       token,
     });
@@ -98,10 +98,10 @@ router.post("/register", async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert new user
+    // Insert new user with is_admin, created_at, updated_at
     const { rows: result } = await pool.query(
-      "INSERT INTO users (fullname, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING id",
-      [fullname, email, phone, hashedPassword]
+      "INSERT INTO users (fullname, email, phone, password, is_admin, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id",
+      [fullname, email, phone, hashedPassword, false]
     );
 
     res.status(201).json({

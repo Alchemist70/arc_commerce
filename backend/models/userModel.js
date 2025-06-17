@@ -7,8 +7,8 @@ const User = {
     try {
       const hash = await bcrypt.hash(user.password, 10);
       const sql =
-        "INSERT INTO users (fullname, email, phone, password) VALUES ($1, $2, $3, $4) RETURNING *";
-      const values = [user.fullname, user.email, user.phone, hash];
+        "INSERT INTO users (fullname, email, phone, password, is_admin, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *";
+      const values = [user.fullname, user.email, user.phone, hash, user.is_admin || false];
       console.log("Executing SQL:", sql);
       console.log("With values:", values);
       const { rows } = await db.query(sql, values);

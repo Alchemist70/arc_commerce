@@ -36,7 +36,7 @@ const App = () => {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         console.log("User state updated:", {
-          isAdmin: parsedUser?.isAdmin,
+          isAdmin: parsedUser?.is_admin,
           hasToken: !!localStorage.getItem("token"),
         });
       } catch (error) {

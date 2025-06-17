@@ -15,7 +15,7 @@ class User {
   static async findAll() {
     try {
       const [rows] = await db.query(
-        "SELECT id, fullname, email, isAdmin FROM users"
+        "SELECT id, fullname, email, is_admin FROM users"
       );
       return rows;
     } catch (error) {
@@ -35,7 +35,7 @@ class User {
   static async toggleAdminStatus(userId) {
     try {
       const [result] = await db.query(
-        "UPDATE users SET isAdmin = NOT isAdmin WHERE id = ?",
+        "UPDATE users SET is_admin = NOT is_admin WHERE id = ?",
         [userId]
       );
       return result;

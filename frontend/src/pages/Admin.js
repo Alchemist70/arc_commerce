@@ -13,7 +13,7 @@ const Admin = () => {
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const token = localStorage.getItem("token");
 
-      if (!token || !user.isAdmin) {
+      if (!token || !user.is_admin) {
         console.log("Not authenticated as admin");
         navigate("/login");
         return;

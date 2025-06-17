@@ -78,15 +78,15 @@ const UserManagement = () => {
             <div className="user-info">
               <h3>{user.fullname}</h3>
               <p>{user.email}</p>
-              <span className={`status ${user.isAdmin ? "admin" : "user"}`}>
-                {user.isAdmin ? "Admin" : "User"}
+              <span className={`status ${user.is_admin ? "admin" : "user"}`}>
+                {user.is_admin ? "Admin" : "User"}
               </span>
             </div>
             <button
               onClick={() => toggleAdminStatus(user.id)}
-              className={user.isAdmin ? "revoke-btn" : "promote-btn"}
+              className={user.is_admin ? "revoke-btn" : "promote-btn"}
             >
-              {user.isAdmin ? "Revoke Admin" : "Make Admin"}
+              {user.is_admin ? "Revoke Admin" : "Make Admin"}
             </button>
           </div>
         ))}

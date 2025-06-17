@@ -136,7 +136,6 @@ router.get("/", authenticateToken, async (req, res) => {
 
 // Add to Cart
 router.post("/", authenticateToken, async (req, res) => {
-  let connection;
   try {
     const userId = req.user.userId;
     const { productId, quantity } = req.body;
@@ -157,25 +156,21 @@ router.post("/", authenticateToken, async (req, res) => {
       return res.status(400).json({ message: "User ID is missing from token" });
     }
 
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-
     // First, verify that the product exists
     console.log("Verifying product exists...");
-    const [product] = await connection.execute(
-      "SELECT id FROM products WHERE id = ?",
+    const { rows: product } = await pool.query(
+      "SELECT id FROM products WHERE id = $1",
       [productId]
     );
 
     if (product.length === 0) {
-      await connection.rollback();
       return res.status(404).json({ message: "Product not found" });
     }
 
     // Check if item already exists in cart
     console.log("Checking existing cart item...");
-    const [existing] = await connection.execute(
-      "SELECT * FROM cart WHERE user_id = ? AND product_id = ?",
+    const { rows: existing } = await pool.query(
+      "SELECT * FROM cart WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
     console.log("Existing items found:", existing.length);
@@ -183,26 +178,22 @@ router.post("/", authenticateToken, async (req, res) => {
     if (existing.length > 0) {
       // Update quantity if item exists
       console.log("Updating existing cart item...");
-      await connection.execute(
-        "UPDATE cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?",
+      await pool.query(
+        "UPDATE cart SET quantity = quantity + $1 WHERE user_id = $2 AND product_id = $3",
         [quantity || 1, userId, productId]
       );
     } else {
       // Add new item to cart
       console.log("Adding new item to cart...");
-      await connection.execute(
-        "INSERT INTO cart (user_id, product_id, quantity) VALUES (?, ?, ?)",
+      await pool.query(
+        "INSERT INTO cart (user_id, product_id, quantity) VALUES ($1, $2, $3)",
         [userId, productId, quantity || 1]
       );
     }
 
-    await connection.commit();
     console.log("Cart operation successful");
     res.status(200).json({ message: "Added to cart successfully" });
   } catch (error) {
-    if (connection) {
-      await connection.rollback();
-    }
     console.error("Cart error details:", {
       message: error.message,
       stack: error.stack,
@@ -215,14 +206,6 @@ router.post("/", authenticateToken, async (req, res) => {
       error: error.message,
       sqlMessage: error.sqlMessage,
     });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 

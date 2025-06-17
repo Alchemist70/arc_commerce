@@ -45,7 +45,6 @@ router.get("/orders", auth, adminAuth, async (req, res) => {
 
 // Update order status (admin only)
 router.put("/orders/:orderId/status", auth, adminAuth, async (req, res) => {
-  let connection;
   try {
     const { status } = req.body;
     const orderId = req.params.orderId;
@@ -54,29 +53,25 @@ router.put("/orders/:orderId/status", auth, adminAuth, async (req, res) => {
       return res.status(400).json({ message: "Status is required" });
     }
 
-    // Get connection from the pool
-    connection = await pool.getConnection();
-
-    // Start transaction
-    await connection.beginTransaction();
-
     // Update order status
-    await connection.execute("UPDATE orders SET status = ? WHERE id = ?", [
-      status,
-      orderId,
-    ]);
+    const { rowCount } = await pool.query(
+      "UPDATE orders SET status = $1 WHERE id = $2",
+      [status, orderId]
+    );
+    if (rowCount === 0) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
     // Get order details for email notification
-    const [orders] = await connection.execute(
+    const { rows: orders } = await pool.query(
       `SELECT o.*, u.email, u.fullname 
        FROM orders o 
        JOIN users u ON o.user_id = u.id 
-       WHERE o.id = ?`,
+       WHERE o.id = $1`,
       [orderId]
     );
 
     if (orders.length === 0) {
-      await connection.rollback();
       return res.status(404).json({ message: "Order not found" });
     }
 
@@ -102,9 +97,6 @@ router.put("/orders/:orderId/status", auth, adminAuth, async (req, res) => {
       }
     }
 
-    // Commit the transaction
-    await connection.commit();
-
     res.json({
       message: "Order status updated successfully",
       emailSent: ["shipped", "delivered", "cancelled"].includes(
@@ -112,27 +104,11 @@ router.put("/orders/:orderId/status", auth, adminAuth, async (req, res) => {
       ),
     });
   } catch (error) {
-    if (connection) {
-      try {
-        await connection.rollback();
-      } catch (rollbackError) {
-        console.error("Error rolling back transaction:", rollbackError);
-      }
-    }
-
     console.error("Error updating order status:", error);
     res.status(500).json({
       message: "Error updating order status",
       error: error.message,
     });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 

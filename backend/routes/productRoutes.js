@@ -20,18 +20,15 @@ router.get("/", async (req, res) => {
 
 // Add new product (admin only)
 router.post("/", authenticateToken, async (req, res) => {
-  let connection;
   try {
     const { name, brand, category, price, description, image_url } = req.body;
     console.log("Adding new product:", req.body);
 
-    connection = await pool.getConnection();
     const query = `
       INSERT INTO products (name, brand, category, price, description, image_url)
-      VALUES ($1, $2, $3, $4, $5, $6)
-    `;
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`;
 
-    const [result] = await connection.execute(query, [
+    const { rows } = await pool.query(query, [
       name,
       brand,
       category,
@@ -42,70 +39,54 @@ router.post("/", authenticateToken, async (req, res) => {
 
     res.status(201).json({
       message: "Product added successfully",
-      productId: result.insertId,
+      productId: rows[0].id,
     });
   } catch (error) {
     console.error("Error adding product:", error);
     res
       .status(500)
       .json({ message: "Error adding product", error: error.message });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 
 // Delete product (admin only)
 router.delete("/:id", authenticateToken, async (req, res) => {
-  let connection;
   try {
-    connection = await pool.getConnection();
-    await connection.execute("DELETE FROM products WHERE id = $1", [
-      req.params.id,
-    ]);
+    const { rowCount } = await pool.query(
+      "DELETE FROM products WHERE id = $1",
+      [req.params.id]
+    );
+    if (rowCount === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
     res.json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
     res.status(500).json({ message: "Error deleting product" });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 
 // Add to cart (authenticated users)
 router.post("/cart", authenticateToken, async (req, res) => {
-  let connection;
   try {
     const { productId, quantity = 1 } = req.body;
     const userId = req.user.userId;
 
-    connection = await pool.getConnection();
     // Check if product exists in cart
-    const [existingItems] = await connection.execute(
+    const { rows: existingItems } = await pool.query(
       "SELECT * FROM cart WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
 
     if (existingItems.length > 0) {
       // Update quantity if product exists
-      await connection.execute(
-        "UPDATE cart SET quantity = quantity + $3 WHERE user_id = $1 AND product_id = $2",
-        [userId, productId, quantity]
+      await pool.query(
+        "UPDATE cart SET quantity = quantity + $1 WHERE user_id = $2 AND product_id = $3",
+        [quantity, userId, productId]
       );
     } else {
       // Add new item to cart
-      await connection.execute(
+      await pool.query(
         "INSERT INTO cart (user_id, product_id, quantity) VALUES ($1, $2, $3)",
         [userId, productId, quantity]
       );
@@ -115,34 +96,24 @@ router.post("/cart", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Error adding to cart:", error);
     res.status(500).json({ message: "Error adding to cart" });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 
 // Add to wishlist (authenticated users)
 router.post("/wishlist", authenticateToken, async (req, res) => {
-  let connection;
   try {
     const { productId } = req.body;
     const userId = req.user.userId;
 
-    connection = await pool.getConnection();
     // Check if product exists in wishlist
-    const [existingItems] = await connection.execute(
+    const { rows: existingItems } = await pool.query(
       "SELECT * FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
 
     if (existingItems.length === 0) {
       // Add to wishlist if not exists
-      await connection.execute(
+      await pool.query(
         "INSERT INTO wishlist (user_id, product_id) VALUES ($1, $2)",
         [userId, productId]
       );
@@ -153,14 +124,6 @@ router.post("/wishlist", authenticateToken, async (req, res) => {
   } catch (error) {
     console.error("Error adding to wishlist:", error);
     res.status(500).json({ message: "Error adding to wishlist" });
-  } finally {
-    if (connection) {
-      try {
-        await connection.release();
-      } catch (releaseError) {
-        console.error("Error releasing connection:", releaseError);
-      }
-    }
   }
 });
 

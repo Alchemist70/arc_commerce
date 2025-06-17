@@ -168,20 +168,19 @@ router.get("/orders", auth, adminAuth, async (req, res) => {
 
 // Update order status
 router.put("/orders/:id/status", auth, adminAuth, async (req, res) => {
-  let connection;
   try {
     const { status } = req.body;
-    connection = await pool.getConnection();
-    await connection.execute("UPDATE orders SET status = ? WHERE id = ?", [
-      status,
-      req.params.id,
-    ]);
+    const { rowCount } = await pool.query(
+      "UPDATE orders SET status = $1 WHERE id = $2",
+      [status, req.params.id]
+    );
+    if (rowCount === 0) {
+      return res.status(404).json({ message: "Order not found" });
+    }
     res.json({ message: "Order status updated successfully" });
   } catch (error) {
     console.error("Error updating order status:", error);
     res.status(500).json({ message: "Error updating order status" });
-  } finally {
-    if (connection) connection.release();
   }
 });
 

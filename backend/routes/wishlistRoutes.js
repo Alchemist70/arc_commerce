@@ -32,15 +32,13 @@ router.post("/", authenticateToken, async (req, res) => {
     console.log("Adding to wishlist for user:", userId, "product:", productId);
 
     // Check if product exists
-    const [products] = await db.query("SELECT * FROM products WHERE id = $1", [
-      productId,
-    ]);
+    const { rows: products } = await db.query("SELECT * FROM products WHERE id = $1", [productId]);
     if (products.length === 0) {
       return res.status(404).json({ message: "Product not found" });
     }
 
     // Check if item already exists in wishlist
-    const [existingItems] = await db.query(
+    const { rows: existingItems } = await db.query(
       "SELECT * FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
@@ -68,12 +66,12 @@ router.delete("/:productId", authenticateToken, async (req, res) => {
     const { productId } = req.params;
     const userId = req.user.userId;
 
-    const [result] = await db.query(
+    const result = await db.query(
       "DELETE FROM wishlist WHERE user_id = $1 AND product_id = $2",
       [userId, productId]
     );
 
-    if (result.affectedRows === 0) {
+    if (result.rowCount === 0) {
       return res.status(404).json({ message: "Wishlist item not found" });
     }
 

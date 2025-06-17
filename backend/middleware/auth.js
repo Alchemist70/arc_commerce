@@ -44,6 +44,7 @@ const authenticateToken = (req, res, next) => {
     // Set user info in request
     req.user = {
       userId: userId, // Use consistent userId field
+      id: userId, // Also set id for compatibility
       email: decoded.email,
       fullname: decoded.fullname,
       isAdmin: decoded.isAdmin,

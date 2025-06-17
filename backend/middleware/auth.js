@@ -47,12 +47,12 @@ const authenticateToken = (req, res, next) => {
       id: userId, // Also set id for compatibility
       email: decoded.email,
       fullname: decoded.fullname,
-      isAdmin: decoded.isAdmin,
+      is_admin: decoded.isAdmin || decoded.is_admin || false,
     };
 
     console.log("Authentication successful, user info set:", {
       userId: req.user.userId,
-      isAdmin: req.user.isAdmin,
+      isAdmin: req.user.is_admin,
     });
 
     next();

@@ -35,7 +35,7 @@ router.post("/login", async (req, res) => {
       userId: user.id,
       email: user.email,
       fullname: user.fullname,
-      isAdmin: Boolean(user.is_admin),
+      is_admin: Boolean(user.is_admin),
     };
 
     const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
@@ -47,7 +47,7 @@ router.post("/login", async (req, res) => {
     console.log(
       "Login successful for:",
       email,
-      "isAdmin:",
+      "is_admin:",
       Boolean(user.is_admin)
     );
 
@@ -55,7 +55,7 @@ router.post("/login", async (req, res) => {
       message: "Login successful",
       user: {
         ...userWithoutPassword,
-        isAdmin: Boolean(user.is_admin),
+        is_admin: Boolean(user.is_admin),
       },
       token,
     });
@@ -95,7 +95,7 @@ router.post("/admin-register", async (req, res) => {
     res.status(201).json({
       message: "Admin registered successfully",
       userId: result[0].id,
-      isAdmin: Boolean(result[0].is_admin),
+      is_admin: Boolean(result[0].is_admin),
     });
   } catch (error) {
     console.error("Admin registration error:", error);
@@ -128,7 +128,7 @@ router.post("/register", async (req, res) => {
     res.status(201).json({
       message: "User registered successfully",
       userId: result[0].id,
-      isAdmin: Boolean(result[0].is_admin),
+      is_admin: Boolean(result[0].is_admin),
     });
   } catch (error) {
     console.error("Registration error:", error);

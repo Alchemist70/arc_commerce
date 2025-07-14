@@ -91,15 +91,21 @@ const Cart = () => {
       }
 
       setCartItems(
-        response.data.map(item => {
-          const productId = Number(item.product_id) || Number(item.productId) || Number(item.id) || 0;
+        response.data.map((item) => {
+          // Always use string for productId
+          const productId = (
+            item.product_id ||
+            item.productId ||
+            item.id ||
+            ""
+          ).toString();
           const mapped = {
             ...item,
             id: item.cart_item_id,
             productId,
             product_id: productId,
           };
-          console.log('[Cart] mapped cart item:', mapped);
+          console.log("[Cart] mapped cart item:", mapped);
           return mapped;
         })
       );
@@ -131,8 +137,12 @@ const Cart = () => {
   };
 
   const updateQuantity = async (productId, newQuantity) => {
-    productId = parseInt(productId, 10);
-    console.log("[Cart] updateQuantity called", { productId, type: typeof productId, newQuantity });
+    // productId is already a string
+    console.log("[Cart] updateQuantity called", {
+      productId,
+      type: typeof productId,
+      newQuantity,
+    });
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -152,8 +162,8 @@ const Cart = () => {
       );
 
       if (response.status === 200) {
-        setCartItems(prevItems =>
-          prevItems.map(item =>
+        setCartItems((prevItems) =>
+          prevItems.map((item) =>
             item.productId === productId
               ? { ...item, quantity: newQuantity }
               : item
@@ -174,11 +184,18 @@ const Cart = () => {
   };
 
   const removeFromCart = async (productId) => {
-    productId = parseInt(productId, 10);
-    console.log("[Cart] removeFromCart called", { productId, type: typeof productId });
-    const confirmed = window.confirm("Are you sure you want to remove this item from your cart?");
+    // productId is already a string
+    console.log("[Cart] removeFromCart called", {
+      productId,
+      type: typeof productId,
+    });
+    const confirmed = window.confirm(
+      "Are you sure you want to remove this item from your cart?"
+    );
     if (!confirmed) return;
-    setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
+    setCartItems((prevItems) =>
+      prevItems.filter((item) => item.productId !== productId)
+    );
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -268,14 +285,18 @@ const Cart = () => {
                 <p className="price">${item.price}</p>
                 <div className="quantity-controls">
                   <button
-                    onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                    onClick={() =>
+                      updateQuantity(item.productId, item.quantity - 1)
+                    }
                     disabled={item.quantity <= 1}
                   >
                     -
                   </button>
                   <span>{item.quantity}</span>
                   <button
-                    onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                    onClick={() =>
+                      updateQuantity(item.productId, item.quantity + 1)
+                    }
                   >
                     +
                   </button>
@@ -299,21 +320,21 @@ const Cart = () => {
             <span>${calculateTotal().toFixed(2)}</span>
           </div>
           <div className="button-group">
-            <button 
-              type="button" 
-              className="back-button" 
+            <button
+              type="button"
+              className="back-button"
               onClick={() => navigate("/")}
             >
               <FontAwesomeIcon icon={faArrowLeft} />
               Back to Shop
             </button>
-            <button 
-              className="checkout-button" 
+            <button
+              className="checkout-button"
               onClick={handleCheckout}
               disabled={cartItems.length === 0}
             >
-            Proceed to Checkout
-          </button>
+              Proceed to Checkout
+            </button>
           </div>
         </div>
       </div>

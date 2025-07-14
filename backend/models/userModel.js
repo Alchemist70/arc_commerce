@@ -62,4 +62,22 @@ userSchema.statics.getAddress = async function (userId) {
   }
 };
 
+userSchema.statics.findAll = async function () {
+  const users = await this.find({}, "fullname email is_admin");
+  return users.map((u) => ({
+    id: u._id.toString(),
+    fullname: u.fullname,
+    email: u.email,
+    is_admin: u.is_admin,
+  }));
+};
+
+userSchema.statics.toggleAdminStatus = async function (userId) {
+  const user = await this.findById(userId);
+  if (!user) throw new Error("User not found");
+  user.is_admin = !user.is_admin;
+  await user.save();
+  return { affectedRows: 1 };
+};
+
 module.exports = mongoose.model("UserModel", userSchema);

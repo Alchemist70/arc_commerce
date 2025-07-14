@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Wishlist = require("../models/wishlistModel");
 const Product = require("../models/productModel");
-const User = require("../models/User");
+const User = require("../models/userModel");
 const authenticateToken = require("../middleware/auth");
 
 // Get wishlist items for the current user
@@ -70,12 +70,10 @@ router.delete("/:productId", authenticateToken, async (req, res) => {
     }
     res.json({ message: "Item removed from wishlist successfully" });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error removing item from wishlist",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error removing item from wishlist",
+      error: error.message,
+    });
   }
 });
 

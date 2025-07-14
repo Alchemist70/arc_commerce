@@ -92,11 +92,39 @@ const App = () => {
               }
             />
 
-            <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <UserProfile />
+                </PrivateRoute>
+              }
+            />
 
-            <Route path="/payment-options" element={<PrivateRoute><PaymentOptions /></PrivateRoute>} />
-            <Route path="/order-confirmation" element={<PrivateRoute><OrderConfirmation /></PrivateRoute>} />
-            <Route path="/payment" element={<PrivateRoute><Payment /></PrivateRoute>} />
+            <Route
+              path="/payment-options"
+              element={
+                <PrivateRoute>
+                  <PaymentOptions />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/order-confirmation"
+              element={
+                <PrivateRoute>
+                  <OrderConfirmation />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/payment"
+              element={
+                <PrivateRoute>
+                  <Payment />
+                </PrivateRoute>
+              }
+            />
 
             {/* Admin Routes */}
             <Route
@@ -118,7 +146,11 @@ const App = () => {
             </Route>
 
             <Route path="/admin-login" element={<AdminLogin />} />
-            <Route path="/admin-signup" element={<AdminSignup />} />
+            <Route path="/admin-register" element={<AdminSignup />} />
+            <Route
+              path="/admin-signup"
+              element={<Navigate to="/admin-register" replace />}
+            />
 
             {/* Catch-all route for 404 */}
             <Route path="*" element={<Navigate to="/" replace />} />

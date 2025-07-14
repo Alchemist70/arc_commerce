@@ -9,7 +9,19 @@ const authenticateToken = require("../middleware/auth");
 router.get("/", async (req, res) => {
   try {
     const products = await Product.find();
-    res.json(products);
+    // Map each product to include 'id' field
+    const mappedProducts = products.map((product) => ({
+      id: product._id.toString(),
+      name: product.name,
+      brand: product.brand,
+      category: product.category,
+      price: product.price,
+      description: product.description,
+      image_url: product.image_url,
+      created_at: product.created_at,
+      updated_at: product.updated_at,
+    }));
+    res.json(mappedProducts);
   } catch (error) {
     res
       .status(500)

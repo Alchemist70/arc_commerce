@@ -10,8 +10,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const users = require("./routes/users");
-const pool = require("./config/db");
-const initializeDatabase = require("./config/initDb");
+const db = require("./config/db");
 
 const app = express();
 
@@ -64,18 +63,12 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 5002;
 
-// ✅ Initialize DB, then start server
-initializeDatabase(pool)
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`✅ Server is running on port ${PORT}`);
-      console.log(`🔗 Test: http://localhost:${PORT}/test`);
-      console.log(`🔗 Register: http://localhost:${PORT}/api/auth/register`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ Failed to initialize database:", err);
-    process.exit(1);
+db.once("open", () => {
+  app.listen(PORT, () => {
+    console.log(`✅ Server is running on port ${PORT}`);
+    console.log(`🔗 Test: http://localhost:${PORT}/test`);
+    console.log(`🔗 Register: http://localhost:${PORT}/api/auth/register`);
   });
+});
 
 module.exports = app; // for testing

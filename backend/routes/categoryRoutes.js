@@ -1,16 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../models/db");
+const Category = require("../models/categoryModel");
 const auth = require("../middleware/auth");
 const adminAuth = require("../middleware/adminAuth");
 
 // Get all categories
 router.get("/categories", auth, adminAuth, async (req, res) => {
   try {
-    const { rows: categories } = await db.query("SELECT * FROM categories");
+    const categories = await Category.find();
     res.json(categories);
   } catch (error) {
-    console.error("Error fetching categories:", error);
     res.status(500).json({ message: "Error fetching categories" });
   }
 });
@@ -19,13 +18,11 @@ router.get("/categories", auth, adminAuth, async (req, res) => {
 router.post("/categories", auth, adminAuth, async (req, res) => {
   try {
     const { name, description } = req.body;
-    const { rows } = await db.query(
-      "INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING id",
-      [name, description]
-    );
-    res.status(201).json({ message: "Category added successfully", id: rows[0].id });
+    const category = await Category.create({ name, description });
+    res
+      .status(201)
+      .json({ message: "Category added successfully", id: category._id });
   } catch (error) {
-    console.error("Error adding category:", error);
     res.status(500).json({ message: "Error adding category" });
   }
 });

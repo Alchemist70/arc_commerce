@@ -1,82 +1,65 @@
-const db = require("./db");
+const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-const User = {
-  // Register a new user
-  register: async (user, callback) => {
-    try {
-      const hash = await bcrypt.hash(user.password, 10);
-      const sql =
-        "INSERT INTO users (fullname, email, phone, password, is_admin, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *";
-      const values = [user.fullname, user.email, user.phone, hash, user.is_admin || false];
-      console.log("Executing SQL:", sql);
-      console.log("With values:", values);
-      const { rows } = await db.query(sql, values);
-      callback(null, rows[0]);
-    } catch (error) {
-      console.error("SQL Error:", error);
-      callback(error);
-    }
+const userAddressSchema = new mongoose.Schema(
+  {
+    address: String,
+    city: String,
+    state: String,
+    zipCode: String,
+    email: String,
+    phone: String,
   },
+  { _id: false }
+);
 
-  // Find user by email
-  findByEmail: async (email, callback) => {
-    const sql = "SELECT * FROM users WHERE email = $1";
-    console.log("Checking email:", email);
-    try {
-      const { rows } = await db.query(sql, [email]);
-      callback(null, rows.length > 0 ? rows[0] : null);
-    } catch (err) {
-      console.error("Error finding user by email:", err);
-      callback(err);
-    }
-  },
+const userSchema = new mongoose.Schema({
+  fullname: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  password: { type: String, required: true },
+  is_admin: { type: Boolean, default: false },
+  address: userAddressSchema,
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now },
+});
 
-  // Compare passwords
-  comparePassword: (password, hash, callback) => {
-    bcrypt.compare(password, hash, (err, isMatch) => {
-      if (err) return callback(err);
-      callback(null, isMatch);
-    });
-  },
-
-  // Save or update shipping address
-  saveAddress: async (userId, addressObj) => {
-    console.log('saveAddress called with userId:', userId, 'addressObj:', addressObj);
-    const sql = `INSERT INTO user_addresses (user_id, address, city, state, zip_code, email, phone)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      ON CONFLICT (user_id) DO UPDATE SET address = EXCLUDED.address, city = EXCLUDED.city, state = EXCLUDED.state, zip_code = EXCLUDED.zip_code, email = EXCLUDED.email, phone = EXCLUDED.phone`;
-    const values = [userId, addressObj.address, addressObj.city, addressObj.state, addressObj.zipCode, addressObj.email, addressObj.phone];
-    try {
-      const { rows } = await db.query(sql, values);
-      return rows[0];
-    } catch (err) {
-      throw err;
-    }
-  },
-
-  // Get shipping address
-  getAddress: async (userId) => {
-    const sql = "SELECT address, city, state, zip_code FROM user_addresses WHERE user_id = $1";
-    console.log('Running SQL:', sql, 'with userId:', userId);
-    try {
-      const { rows } = await db.query(sql, [userId]);
-      console.log('DB results in getAddress:', rows);
-      if (rows.length > 0) {
-        return {
-          address: rows[0].address,
-          city: rows[0].city,
-          state: rows[0].state,
-          zipCode: rows[0].zip_code
-        };
-      } else {
-        return { address: '', city: '', state: '', zipCode: '' };
-      }
-    } catch (err) {
-      console.error('DB error in getAddress:', err);
-      throw err;
-    }
-  },
+userSchema.statics.register = async function (user, callback) {
+  try {
+    const hash = await bcrypt.hash(user.password, 10);
+    user.password = hash;
+    const newUser = await this.create(user);
+    callback(null, newUser);
+  } catch (error) {
+    callback(error);
+  }
 };
 
-module.exports = User;
+userSchema.statics.findByEmail = function (email, callback) {
+  this.findOne({ email }, (err, user) => {
+    if (err) return callback(err);
+    callback(null, user);
+  });
+};
+
+userSchema.statics.comparePassword = function (password, hash, callback) {
+  bcrypt.compare(password, hash, (err, isMatch) => {
+    if (err) return callback(err);
+    callback(null, isMatch);
+  });
+};
+
+userSchema.statics.saveAddress = async function (userId, addressObj) {
+  return this.findByIdAndUpdate(userId, { address: addressObj }, { new: true });
+};
+
+userSchema.statics.getAddress = async function (userId) {
+  const user = await this.findById(userId);
+  if (user && user.address) {
+    return user.address;
+  } else {
+    return { address: "", city: "", state: "", zipCode: "" };
+  }
+};
+
+module.exports = mongoose.model("UserModel", userSchema);

@@ -1,70 +1,72 @@
 const express = require("express");
 const router = express.Router();
-const pool = require("../models/db");
+const Order = require("../models/orderModel");
+const OrderItem = require("../models/orderItemModel");
+const Payment = require("../models/paymentModel");
+const Cart = require("../models/cartModel");
+const Product = require("../models/productModel");
+const User = require("../models/User");
 const auth = require("../middleware/auth");
 const adminAuth = require("../middleware/adminAuth");
 const { sendOrderConfirmationEmail } = require("../utils/emailService");
-
-// Helper to ensure no undefined values are passed to SQL
-function safe(v) {
-  return v === undefined ? null : v;
-}
 
 // Create new order with payment
 router.post("/", auth, async (req, res) => {
   const userId = req.user.userId;
   const { items, total, paymentMethod, paymentStatus, shipping } = req.body;
-  const client = await pool.connect();
   try {
-    await client.query('BEGIN');
-    // Check that all product_ids exist in the products table
-    const productIds = items.map(item => item.product_id);
-    const productCheckQuery = `SELECT id FROM products WHERE id = ANY($1)`;
-    const { rows: existingProducts } = await client.query(productCheckQuery, [productIds]);
-    const existingIds = new Set(existingProducts.map(row => row.id));
-    const missingIds = productIds.filter(id => !existingIds.has(id));
+    // Check that all product_ids exist
+    const productIds = items.map((item) => item.product_id);
+    const products = await Product.find({ _id: { $in: productIds } });
+    const existingIds = new Set(products.map((p) => p._id.toString()));
+    const missingIds = productIds.filter((id) => !existingIds.has(id));
     if (missingIds.length > 0) {
-      await client.query('ROLLBACK');
       return res.status(400).json({
-        message: `Some products in your cart no longer exist: ${missingIds.join(', ')}`
+        message: `Some products in your cart no longer exist: ${missingIds.join(
+          ", "
+        )}`,
       });
     }
-    // Insert order
-    const orderParams = [
-      safe(userId), safe(total), safe(paymentMethod), safe(paymentStatus), "pending",
-      safe(shipping?.firstName), safe(shipping?.lastName || "-"), safe(shipping?.email),
-      safe(shipping?.address), safe(shipping?.city), safe(shipping?.state), safe(shipping?.zipCode)
-    ];
-    const orderInsert = await client.query(
-      `INSERT INTO orders (
-        user_id, total_amount, payment_method, payment_status, status,
-        shipping_first_name, shipping_last_name, shipping_email,
-        shipping_address, shipping_city, shipping_state, shipping_zip_code
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
-      orderParams
-    );
-    const orderId = orderInsert.rows[0].id;
+    // Create order
+    const order = await Order.create({
+      user: userId,
+      total_amount: total,
+      payment_method: paymentMethod,
+      payment_status: paymentStatus,
+      status: "pending",
+      shipping_first_name: shipping?.firstName,
+      shipping_last_name: shipping?.lastName || "-",
+      shipping_email: shipping?.email,
+      shipping_address: shipping?.address,
+      shipping_city: shipping?.city,
+      shipping_state: shipping?.state,
+      shipping_zip_code: shipping?.zipCode,
+    });
     // Create payment record
-    await client.query(
-      "INSERT INTO payments (order_id, amount, payment_method, status) VALUES ($1, $2, $3, $4)",
-      [orderId, total, paymentMethod, paymentStatus]
-    );
+    await Payment.create({
+      order: order._id,
+      amount: total,
+      payment_method: paymentMethod,
+      status: paymentStatus,
+    });
     // Insert order items
     for (const item of items) {
-      await client.query(
-        "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
-        [orderId, item.product_id, item.quantity, item.price]
-      );
+      await OrderItem.create({
+        order: order._id,
+        product: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+      });
     }
     // Clear user's cart
-    await client.query("DELETE FROM cart WHERE user_id = $1", [userId]);
-    await client.query('COMMIT');
-    res.status(201).json({ message: "Order placed successfully", orderId });
+    await Cart.deleteMany({ user: userId });
+    res
+      .status(201)
+      .json({ message: "Order placed successfully", orderId: order._id });
   } catch (error) {
-    await client.query('ROLLBACK');
-    res.status(500).json({ message: "Failed to place order", error: error.message });
-  } finally {
-    client.release();
+    res
+      .status(500)
+      .json({ message: "Failed to place order", error: error.message });
   }
 });
 
@@ -72,44 +74,36 @@ router.post("/", auth, async (req, res) => {
 router.get("/", auth, async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { rows: orders } = await pool.query(
-      `SELECT o.*, p.status as payment_status
-      FROM orders o
-      LEFT JOIN payments p ON o.id = p.order_id
-      WHERE o.user_id = $1
-      ORDER BY o.created_at DESC`,
-      [userId]
-    );
+    const orders = await Order.find({ user: userId }).sort({ created_at: -1 });
     if (orders.length === 0) {
       return res.json([]);
     }
-    const orderIds = orders.map((order) => order.id);
-    const { rows: allOrderItems } = await pool.query(
-      `SELECT oi.order_id, oi.quantity, oi.price, p.name, p.description, p.image_url, p.category
-      FROM order_items oi
-      LEFT JOIN products p ON oi.product_id = p.id
-      WHERE oi.order_id = ANY($1)`,
-      [orderIds]
-    );
+    const orderIds = orders.map((order) => order._id);
+    const allOrderItems = await OrderItem.find({
+      order: { $in: orderIds },
+    }).populate("product");
     const itemsByOrder = allOrderItems.reduce((acc, item) => {
-      if (!acc[item.order_id]) acc[item.order_id] = [];
-      acc[item.order_id].push({
-        name: item.name || "Unknown Product",
+      const oid = item.order.toString();
+      if (!acc[oid]) acc[oid] = [];
+      acc[oid].push({
+        name: item.product?.name || "Unknown Product",
         quantity: item.quantity,
         price: item.price,
-        description: item.description,
-        image_url: item.image_url,
-        category: item.category,
+        description: item.product?.description,
+        image_url: item.product?.image_url,
+        category: item.product?.category,
       });
       return acc;
     }, {});
     const formattedOrders = orders.map((order) => ({
-      ...order,
-      items: itemsByOrder[order.id] || [],
+      ...order.toObject(),
+      items: itemsByOrder[order._id.toString()] || [],
     }));
     res.json(formattedOrders);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch orders", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch orders", error: error.message });
   }
 });
 
@@ -118,48 +112,33 @@ router.get("/:orderId", auth, async (req, res) => {
   try {
     const userId = req.user.userId;
     const orderId = req.params.orderId;
-    const { rows: orderDetails } = await pool.query(
-      `SELECT o.*, p.status as payment_status
-      FROM orders o
-      LEFT JOIN payments p ON o.id = p.order_id
-      WHERE o.id = $1 AND o.user_id = $2`,
-      [orderId, userId]
-    );
-    if (orderDetails.length === 0) {
+    const order = await Order.findOne({ _id: orderId, user: userId });
+    if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
-    const { rows: orderItems } = await pool.query(
-      `SELECT oi.quantity, oi.price, prod.name, prod.description, prod.image_url, prod.category
-      FROM order_items oi
-      LEFT JOIN products prod ON oi.product_id = prod.id
-      WHERE oi.order_id = $1`,
-      [orderId]
+    const orderItems = await OrderItem.find({ order: orderId }).populate(
+      "product"
     );
-    const order = {
-      ...orderDetails[0],
-      items: orderItems.map((item) => ({
-        name: item.name || "Unknown Product",
-        quantity: item.quantity,
-        price: item.price,
-        description: item.description,
-        image_url: item.image_url,
-        category: item.category,
-      })),
-    };
-    res.json(order);
+    const formattedItems = orderItems.map((item) => ({
+      name: item.product?.name || "Unknown Product",
+      quantity: item.quantity,
+      price: item.price,
+      description: item.product?.description,
+      image_url: item.product?.image_url,
+      category: item.product?.category,
+    }));
+    res.json({ ...order.toObject(), items: formattedItems });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch order details", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch order details", error: error.message });
   }
 });
 
 // Get all orders (admin only)
 router.get("/orders", auth, adminAuth, async (req, res) => {
   try {
-    const { rows: orders } = await pool.query(
-      `SELECT orders.*, users.fullname 
-      FROM orders 
-      JOIN users ON orders.user_id = users.id`
-    );
+    const orders = await Order.find().populate("user");
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: "Error fetching orders" });
@@ -170,18 +149,18 @@ router.get("/orders", auth, adminAuth, async (req, res) => {
 router.put("/orders/:id/status", auth, adminAuth, async (req, res) => {
   try {
     const { status } = req.body;
-    const { rowCount } = await pool.query(
-      "UPDATE orders SET status = $1 WHERE id = $2",
-      [status, req.params.id]
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
     );
-    if (rowCount === 0) {
+    if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
     res.json({ message: "Order status updated successfully" });
   } catch (error) {
-    console.error("Error updating order status:", error);
     res.status(500).json({ message: "Error updating order status" });
   }
 });
 
-module.exports = router; 
+module.exports = router;

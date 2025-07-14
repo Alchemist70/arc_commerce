@@ -1,49 +1,34 @@
-const db = require("./db");
+const mongoose = require("mongoose");
 
-class User {
-  static async findByEmail(email) {
-    try {
-      const { rows } = await db.query("SELECT * FROM users WHERE email = $1", [email]);
-      return rows[0];
-    } catch (error) {
-      throw error;
-    }
-  }
+const userSchema = new mongoose.Schema({
+  fullname: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  password: { type: String, required: true },
+  is_admin: { type: Boolean, default: false },
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now },
+});
 
-  static async findAll() {
-    try {
-      const { rows } = await db.query(
-        "SELECT id, fullname, email, is_admin FROM users"
-      );
-      return rows;
-    } catch (error) {
-      throw error;
-    }
-  }
+userSchema.statics.findByEmail = function (email) {
+  return this.findOne({ email });
+};
 
-  static async createAdmin(user) {
-    try {
-      const { rows } = await db.query(
-        "INSERT INTO users (fullname, email, phone, password, is_admin, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING *",
-        [user.fullname, user.email, user.phone, user.password, true]
-      );
-      return rows[0];
-    } catch (error) {
-      throw error;
-    }
-  }
+userSchema.statics.findAll = function () {
+  return this.find({}, "id fullname email is_admin");
+};
 
-  static async toggleAdminStatus(userId) {
-    try {
-      const { rowCount } = await db.query(
-        "UPDATE users SET is_admin = NOT is_admin WHERE id = $1",
-        [userId]
-      );
-      return { affectedRows: rowCount };
-    } catch (error) {
-      throw error;
-    }
-  }
-}
+userSchema.statics.createAdmin = function (user) {
+  user.is_admin = true;
+  return this.create(user);
+};
 
-module.exports = User;
+userSchema.statics.toggleAdminStatus = async function (userId) {
+  const user = await this.findById(userId);
+  if (!user) throw new Error("User not found");
+  user.is_admin = !user.is_admin;
+  await user.save();
+  return { affectedRows: 1 };
+};
+
+module.exports = mongoose.model("User", userSchema);

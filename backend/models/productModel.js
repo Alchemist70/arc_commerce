@@ -1,33 +1,22 @@
-const db = require("./db");
+const mongoose = require("mongoose");
 
-const Product = {
-  getAll: async () => {
-    try {
-      const { rows } = await db.query("SELECT * FROM products");
-      return rows;
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
-    }
-  },
+const productSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  brand: String,
+  category: String,
+  price: { type: Number, required: true },
+  description: String,
+  image_url: String,
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now },
+});
 
-  add: async (data) => {
-    const { name, brand, category, price } = data;
-    if (!name || !brand || !category || !price) {
-      throw new Error("All fields are required");
-    }
-
-    try {
-      const { rows } = await db.query(
-        "INSERT INTO products (name, brand, category, price) VALUES ($1, $2, $3, $4) RETURNING id",
-        [name, brand, category, price]
-      );
-      return { message: "Product added successfully!", id: rows[0].id };
-    } catch (error) {
-      console.error("Error adding product:", error);
-      throw error;
-    }
-  },
+productSchema.statics.getAll = function () {
+  return this.find();
 };
 
-module.exports = Product;
+productSchema.statics.add = function (data) {
+  return this.create(data);
+};
+
+module.exports = mongoose.model("Product", productSchema);

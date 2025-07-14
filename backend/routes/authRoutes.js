@@ -48,9 +48,14 @@ router.get("/test", (req, res) => {
 // ------------------ ADMIN REGISTER ------------------
 router.post("/admin-register", async (req, res) => {
   try {
-    const { fullname, email, phone, password } = req.body;
-    if (!fullname || !email || !phone || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+    const { fullname, email, phone, password, secretCode } = req.body;
+    if (!fullname || !email || !phone || !password || !secretCode) {
+      return res
+        .status(400)
+        .json({ message: "All fields and secret code are required" });
+    }
+    if (secretCode !== process.env.ADMIN_SECRET_CODE) {
+      return res.status(403).json({ message: "Invalid secret code" });
     }
     // Check if user exists
     const existingUser = await User.findOne({ email });

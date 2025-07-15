@@ -73,23 +73,27 @@ const UserManagement = () => {
     <div className="user-management">
       <h2>User Management</h2>
       <div className="users-list">
-        {users.map((user) => (
-          <div key={user.id} className="user-item">
-            <div className="user-info">
-              <h3>{user.fullname}</h3>
-              <p>{user.email}</p>
-              <span className={`status ${user.is_admin ? "admin" : "user"}`}>
-                {user.is_admin ? "Admin" : "User"}
-              </span>
+        {users.length === 0 ? (
+          <div className="no-users">No users found.</div>
+        ) : (
+          users.map((user) => (
+            <div key={user.id} className="user-item">
+              <div className="user-info">
+                <h3>{user.fullname}</h3>
+                <p>{user.email}</p>
+                <span className={`status ${user.is_admin ? "admin" : "user"}`}>
+                  {user.is_admin ? "Admin" : "User"}
+                </span>
+              </div>
+              <button
+                onClick={() => toggleAdminStatus(user.id)}
+                className={user.is_admin ? "revoke-btn" : "promote-btn"}
+              >
+                {user.is_admin ? "Revoke Admin" : "Make Admin"}
+              </button>
             </div>
-            <button
-              onClick={() => toggleAdminStatus(user.id)}
-              className={user.is_admin ? "revoke-btn" : "promote-btn"}
-            >
-              {user.is_admin ? "Revoke Admin" : "Make Admin"}
-            </button>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

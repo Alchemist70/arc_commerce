@@ -33,7 +33,24 @@ router.put("/users/:userId/toggle-admin", auth, adminAuth, async (req, res) => {
 router.get("/orders", auth, adminAuth, async (req, res) => {
   try {
     const orders = await Order.find().populate("user");
-    res.json(orders);
+    // Map orders to include expected fields for frontend
+    const mappedOrders = orders.map((order) => ({
+      order_id: order._id.toString(),
+      order_date: order.created_at,
+      first_name: order.user?.fullname?.split(" ")[0] || "",
+      last_name: order.user?.fullname?.split(" ")[1] || "",
+      user_email: order.user?.email || "",
+      payment_status: order.payment_status,
+      status: order.status,
+      shipping_address: order.shipping_address,
+      shipping_city: order.shipping_city,
+      shipping_state: order.shipping_state,
+      shipping_zip_code: order.shipping_zip_code,
+      total_amount: order.total_amount,
+      items: [], // Items will be filled in the frontend or by another endpoint
+      ...order.toObject(), // Keep all other fields for compatibility
+    }));
+    res.json(mappedOrders);
   } catch (error) {
     res.status(500).json({ message: "Error fetching orders" });
   }
